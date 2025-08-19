@@ -1,9 +1,7 @@
-<div class="panel-container">
-  <div></div>
-</div>
+<script>
+  import SetFreqGain from "./SetFreqGain.svelte";
+</script>
 
-<style>
-  .panel-container {
-    background-color: aquamarine;
-  }
-</style>
+<div>
+  <SetFreqGain />
+</div>
