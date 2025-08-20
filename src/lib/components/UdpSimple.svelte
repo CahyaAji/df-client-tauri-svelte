@@ -99,8 +99,8 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     max-width: 500px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
   .realtime-display {

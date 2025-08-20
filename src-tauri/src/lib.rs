@@ -30,8 +30,9 @@ async fn start_udp_listener(
 ) -> Result<String, String> {
     let mut is_running = state.is_running.lock().await;
 
+    // If already running, don't fail — just acknowledge
     if *is_running {
-        return Err("Already listening".to_string());
+        return Ok(format!("Already listening on port {}!", port));
     }
 
     // Create socket with SO_REUSEADDR equivalent
@@ -40,7 +41,7 @@ async fn start_udp_listener(
         .map_err(|e| format!("Failed to bind: {}", e))?;
 
     *is_running = true;
-    drop(is_running); // Release the lock early
+    drop(is_running); // Release lock early
 
     let is_running_clone = state.is_running.clone();
     let app_handle_clone = app_handle.clone();
@@ -95,18 +96,22 @@ async fn start_udp_listener(
 
 #[tauri::command]
 async fn stop_udp_listener(state: tauri::State<'_, UdpState>) -> Result<String, String> {
-    // First, signal the task to stop
+    // Signal the task to stop
     {
         let mut is_running = state.is_running.lock().await;
+        if !*is_running {
+            // Already stopped — return Ok instead of Err
+            return Ok("Already stopped".to_string());
+        }
         *is_running = false;
     }
 
-    // Then abort the task if it exists
+    // Abort the task if it exists
     {
         let mut task_handle_guard = state.task_handle.lock().await;
         if let Some(handle) = task_handle_guard.take() {
             handle.abort();
-            // Wait a moment for cleanup
+            // Small delay for cleanup
             tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
         }
     }

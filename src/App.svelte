@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from "svelte";
+  import { get } from "svelte/store";
   import Header from "./lib/components/Header.svelte";
   import PlotContainer from "./lib/components/PlotContainer.svelte";
   import SetupPanel from "./lib/components/SetupPanel.svelte";
@@ -14,16 +15,40 @@
 
   let udpNotif = "";
 
+  $: if (isUdpListening && udpCurrentNumb !== null) {
+    console.log("UDP now: " + udpCurrentNumb);
+  }
+
   onMount(async () => {
     dfStore.start();
-    udpNotif = await udpStore.startListening(55555);
-    console.log(udpNotif);
+
+    try {
+      // only call if not already listening
+      if (!get(isUdpListening)) {
+        udpNotif = await udpStore.startListening(55555);
+      } else {
+        udpNotif = "UDP already active, using existing listener";
+      }
+    } catch (err) {
+      udpNotif = "UDP error: " + err.message;
+    } finally {
+      console.log("Parent mount:", udpNotif);
+    }
   });
 
   onDestroy(async () => {
     dfStore.stop();
-    udpNotif = await udpStore.stopListening();
-    console.log(udpNotif);
+    try {
+      if (get(isUdpListening)) {
+        udpNotif = await udpStore.stopListening();
+      } else {
+        udpNotif = "UDP was not active";
+      }
+    } catch (err) {
+      udpNotif = "UDP stop error: " + err.message;
+    } finally {
+      console.log("Parent destroy:", udpNotif);
+    }
   });
 </script>
 
@@ -34,15 +59,4 @@
   <StatusWebv />
   <PlotContainer />
   <SetupPanel />
-
-  <!-- <div>
-    {#if $isUdpListening}
-      <div>Listening for UDP messages...</div>
-      {#if $udpCurrentNumb !== null}
-        <div>Current UDP Number: {$udpCurrentNumb}</div>
-      {/if}
-    {:else}
-      <div>Not listening for UDP messages</div>
-    {/if}
-  </div> -->
 </main>
