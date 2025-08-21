@@ -3,7 +3,7 @@ import { writable, get } from "svelte/store";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
-export const udpCurrentNumb = writable(null);
+export const udpCurrentNumb = writable(0);
 export const udpCurrentMsg = writable(null);
 export const isUdpListening = writable(false);
 

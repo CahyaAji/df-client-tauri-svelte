@@ -7,23 +7,61 @@
   import StatusWebv from "./lib/components/StatusWebv.svelte";
 
   import { dfStore } from "./lib/stores/dfStore.js";
+  import { setFreqGainApi } from "./lib/utils/apihandler.js";
   import {
     udpStore,
     udpCurrentNumb,
     isUdpListening,
   } from "./lib/stores/udpStore.js";
 
-  let udpNotif = "";
+  let udpNotif = $state("");
+  let isChangingFreq = $state(false);
+  let prevFreq = $state(null);
 
-  $: if (isUdpListening && udpCurrentNumb !== null) {
-    console.log("UDP now: " + udpCurrentNumb);
+  /**
+   * @param {number} [newFreq]
+   */
+  async function handleSetFreq(newFreq) {
+    if (isChangingFreq || newFreq === prevFreq) return;
+
+    isChangingFreq = true;
+    prevFreq = newFreq;
+
+    const antSpace = newFreq >= 250 ? 0.25 : 0.45;
+    // setAntena();
+    // setGain();
+
+    try {
+      const apiData = {
+        center_freq: newFreq,
+        uniform_gain: 0,
+        ant_space_meters: antSpace,
+      };
+      console.log("handleSetFreq called, freq: ", apiData);
+      const result = await setFreqGainApi(apiData);
+      console.log("handleSetFreq result:", result);
+    } catch (error) {
+      console.error("App.svelte Error handleSetFreq:", error);
+      // prevFreq = null; //reset on error to allow retry
+    } finally {
+      isChangingFreq = false;
+      console.log("handleSetFreq finished");
+    }
   }
+
+  $effect(() => {
+    if ($udpCurrentNumb >= 24000000 && $udpCurrentNumb <= 1000000000) {
+      const freqInMhz = ($udpCurrentNumb / 1000000).toFixed(3);
+      if ($isUdpListening && freqInMhz !== null && freqInMhz !== prevFreq) {
+        handleSetFreq(Number(freqInMhz));
+      }
+    }
+  });
 
   onMount(async () => {
     dfStore.start();
 
     try {
-      // only call if not already listening
       if (!get(isUdpListening)) {
         udpNotif = await udpStore.startListening(55555);
       } else {

@@ -32,3 +32,23 @@ export const readDF = async () => {
     return { success: false, error: error.message };
   }
 };
+
+export const setFreqGainApi = async (
+  /** @type {{center_freq: number, uniform_gain: number, ant_space_meters: number}} */ data
+) => {
+  try {
+    const response = await fetch(API_URL + "/api/settings/freq", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    if (response.status === 200) {
+      const jsonResponse = await response.json();
+      console.log("setFreqGainApi success: ", jsonResponse);
+    }
+  } catch (error) {
+    console.error("Error setFreqGainApi: ", error);
+  }
+};
