@@ -1,7 +1,7 @@
 import { fetch } from "@tauri-apps/plugin-http";
 
-// export const API_URL = "http://192.168.17.17:8087";
-export const API_URL = "http://localhost:3000";
+export const API_URL = "http://192.168.17.17:8087";
+// export const API_URL = "http://localhost:3000";
 
 export const readDF = async () => {
   try {
@@ -34,7 +34,7 @@ export const readDF = async () => {
 };
 
 export const setFreqGainApi = async (
-  /** @type {{center_freq: number, uniform_gain: number, ant_space_meters: number}} */ data
+  /** @type {{center_freq: number, uniform_gain: number, ant_spacing_meters: number}} */ data
 ) => {
   try {
     const response = await fetch(API_URL + "/api/settings/freq", {
