@@ -35,7 +35,7 @@
       const apiData = {
         center_freq: newFreq,
         uniform_gain: 0,
-        ant_space_meters: antSpace,
+        ant_spacing_meters: antSpace,
       };
       console.log("handleSetFreq called, freq: ", apiData);
       const result = await setFreqGainApi(apiData);
@@ -70,7 +70,7 @@
     } catch (err) {
       udpNotif = "UDP error: " + err.message;
     } finally {
-      console.log("Parent mount:", udpNotif);
+      console.log("Parent mount: ", udpNotif);
     }
   });
 
@@ -91,7 +91,7 @@
 </script>
 
 <main
-  style="display: grid; grid-template-rows: 40px 3fr 4fr 3fr; height: 100vh;"
+  style="display: grid; grid-template-rows: 40px 4fr 4fr 3fr; height: 100vh;"
 >
   <Header />
   <StatusWebv />
