@@ -111,7 +111,6 @@
       <button>Set</button>
     </label>
   </div>
-  <div>Bottom Menu</div>
 </div>
 
 <style>
@@ -119,7 +118,6 @@
     display: grid;
     grid-template-rows: auto 1fr 1fr auto;
     background-color: lightgray;
-    height: 100%;
   }
 
   .title {
