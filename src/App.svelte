@@ -1,20 +1,16 @@
 <script>
-  import { onMount, onDestroy } from "svelte";
-  import { get } from "svelte/store";
   import Header from "./lib/components/Header.svelte";
   import PlotContainer from "./lib/components/PlotContainer.svelte";
   import SetupPanel from "./lib/components/SetupPanel.svelte";
   import StatusWebv from "./lib/components/StatusWebv.svelte";
 
-  import { dfStore } from "./lib/stores/dfStore.js";
+  import { dfStore } from "./lib/stores/dfStore.svelte.js";
   import { setFreqGainApi } from "./lib/utils/apihandler.js";
-  import {
-    udpStore,
-    udpCurrentNumb,
-    isUdpListening,
-  } from "./lib/stores/udpStore.js";
+  import { udpState, udpStore } from "./lib/stores/udpStore.svelte.js";
 
-  let udpNotif = $state("");
+  // Module-level flag to survive HMR
+  let appInitialized = false;
+
   let isChangingFreq = $state(false);
   let prevFreq = $state(null);
 
@@ -28,8 +24,6 @@
     prevFreq = newFreq;
 
     const antSpace = newFreq >= 250 ? 0.25 : 0.45;
-    // setAntena();
-    // setGain();
 
     try {
       const apiData = {
@@ -42,7 +36,6 @@
       console.log("handleSetFreq result:", result);
     } catch (error) {
       console.error("App.svelte Error handleSetFreq:", error);
-      // prevFreq = null; //reset on error to allow retry
     } finally {
       isChangingFreq = false;
       console.log("handleSetFreq finished");
@@ -50,43 +43,78 @@
   }
 
   $effect(() => {
-    if ($udpCurrentNumb >= 24000000 && $udpCurrentNumb <= 1000000000) {
-      const freqInMhz = ($udpCurrentNumb / 1000000).toFixed(3);
-      if ($isUdpListening && freqInMhz !== null && freqInMhz !== prevFreq) {
+    console.log("Frequency effect running, currentNumb:", udpState.currentNumb);
+
+    if (
+      udpState.currentNumb >= 24000000 &&
+      udpState.currentNumb <= 1000000000
+    ) {
+      const freqInMhz = (udpState.currentNumb / 1000000).toFixed(3);
+      console.log(
+        "Checking frequency:",
+        freqInMhz,
+        "isListening:",
+        udpState.isListening,
+        "prevFreq:",
+        prevFreq
+      );
+
+      if (
+        udpState.isListening &&
+        freqInMhz !== null &&
+        freqInMhz !== prevFreq
+      ) {
+        console.log("Calling handleSetFreq with:", freqInMhz);
         handleSetFreq(Number(freqInMhz));
       }
     }
   });
 
-  onMount(async () => {
-    dfStore.start();
+  // Mount/Destroy effect - start services once and let them run
+  $effect(() => {
+    console.log("Main effect running, appInitialized:", appInitialized);
 
-    try {
-      if (!get(isUdpListening)) {
-        udpNotif = await udpStore.startListening(55555);
-      } else {
-        udpNotif = "UDP already active, using existing listener";
-      }
-    } catch (err) {
-      udpNotif = "UDP error: " + err.message;
-    } finally {
-      console.log("Parent mount: ", udpNotif);
+    if (appInitialized) {
+      console.log("App already initialized, skipping");
+      return () => {
+        console.log("Skipped initialization cleanup - doing nothing");
+      };
     }
-  });
 
-  onDestroy(async () => {
-    dfStore.stop();
-    try {
-      if (get(isUdpListening)) {
-        udpNotif = await udpStore.stopListening();
+    async function initialize() {
+      console.log("Initializing app...");
+      appInitialized = true;
+
+      if (!dfStore.isRunning) {
+        console.log("Starting dfStore...");
+        dfStore.start();
+        console.log("DF Store started - will run until app closes");
       } else {
-        udpNotif = "UDP was not active";
+        console.log("dfStore already running");
       }
-    } catch (err) {
-      udpNotif = "UDP stop error: " + err.message;
-    } finally {
-      console.log("Parent destroy:", udpNotif);
+
+      try {
+        const result = await udpStore.startListening(55555);
+        console.log("Parent mount:", result); // Just log, don't assign to udpNotif
+      } catch (err) {
+        console.log("UDP error:", err.message); // Just log, don't assign to udpNotif
+      }
     }
+
+    initialize();
+
+    // Cleanup - only clean up UDP, let dfStore run until process ends
+    return async () => {
+      console.log(
+        "Effect cleanup running - this should only happen on component unmount"
+      );
+      try {
+        const result = await udpStore.stopListening();
+        console.log("Parent destroy:", result); // Just log, don't assign to udpNotif
+      } catch (err) {
+        console.log("UDP stop error:", err.message); // Just log, don't assign to udpNotif
+      }
+    };
   });
 </script>
 

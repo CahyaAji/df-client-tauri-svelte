@@ -1,7 +1,7 @@
 import { fetch } from "@tauri-apps/plugin-http";
 
-export const API_URL = "http://192.168.17.17:8087";
-// export const API_URL = "http://localhost:3000";
+// export const API_URL = "http://192.168.17.17:8087";
+export const API_URL = "http://localhost:3000";
 
 export const readDF = async () => {
   try {
@@ -22,7 +22,7 @@ export const readDF = async () => {
 
     const data = {
       time: dataArray[0].trim(),
-      heading: dataArray[1].trim(),
+      heading: (360 - Number(dataArray[1].trim())) % 360,
       confidence: dataArray[2].trim(),
       power: dataArray[3].trim(),
       polar: dataArray.slice(17, 377).map(Number).reverse(),
@@ -50,5 +50,28 @@ export const setFreqGainApi = async (
     }
   } catch (error) {
     console.error("Error setFreqGainApi: ", error);
+  }
+};
+
+export const turnOffDf = async () => {
+  try {
+    const response = await fetch(API_URL + "/api/shutdown");
+  } catch (error) {
+    console.error("Error TurnOffDF: ", error);
+  } finally {
+    setTimeout(() => {
+      console.log("turning off DF App");
+    }, 2000);
+  }
+};
+
+export const restartDf = async () => {
+  try {
+  } catch (error) {
+    console.error("Error RestartDF: ", error);
+  } finally {
+    setTimeout(() => {
+      console.log("restarting DF App");
+    }, 2000);
   }
 };

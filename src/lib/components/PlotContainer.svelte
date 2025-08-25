@@ -19,13 +19,13 @@
       <label>
         <div class="radio-title">
           <input type="radio" value="absoluteTab" bind:group={activeTab} />
-          <div>Absolute</div>
+          <div>North Cmps</div>
         </div>
       </label>
       <label>
         <div class="radio-title">
           <input type="radio" value="detailTab" bind:group={activeTab} />
-          <div>North Cmps</div>
+          <div>Detail</div>
         </div>
       </label>
     </div>

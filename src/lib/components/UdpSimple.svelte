@@ -4,7 +4,7 @@
     udpStore,
     udpCurrentNumb,
     isUdpListening,
-  } from "../stores/udpStore.js";
+  } from "../stores/udpStore.svelte.js";
 
   let port = 55555;
   let numberToSend = 0;
@@ -13,7 +13,7 @@
 
   async function toggleListening() {
     try {
-      if ($isUdpListening) {
+      if (isUdpListening) {
         message = await udpStore.stopListening();
       } else {
         message = await udpStore.startListening(port);
@@ -37,12 +37,12 @@
 
   <!-- Real-time Display -->
   <div class="realtime-display">
-    {#if $isUdpListening}
+    {#if isUdpListening}
       <div class="listening-indicator">🟢 Listening on port {port}</div>
-      {#if $udpCurrentNumb !== null}
+      {#if udpCurrentNumb !== null}
         <div class="current-value">
           <span class="label">Current:</span>
-          <span class="number">{$udpCurrentNumb}</span>
+          <span class="number">{udpCurrentNumb}</span>
         </div>
       {:else}
         <div class="waiting">Waiting for data...</div>
@@ -59,12 +59,12 @@
       <input
         type="number"
         bind:value={port}
-        disabled={$isUdpListening}
+        disabled={isUdpListening}
         min="1024"
         max="65535"
       />
       <button on:click={toggleListening}>
-        {$isUdpListening ? "Stop" : "Start"}
+        {isUdpListening ? "Stop" : "Start"}
       </button>
     </div>
 

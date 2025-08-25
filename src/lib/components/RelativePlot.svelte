@@ -1,19 +1,19 @@
 <script>
-  import { dfData } from "./../stores/dfStore";
+  import { dfStore } from "../stores/dfStore.svelte.js";
 </script>
 
 <div class="circle-container">
-  {#if $dfData}
+  {#if dfStore.data}
     <div
       class="rotating-circle"
-      style="transform: rotate({$dfData.heading}deg);"
+      style="transform: rotate({dfStore.data.heading}deg);"
     >
       <div class="arrow"></div>
     </div>
   {/if}
   <div class="angle-text">
-    {#if $dfData}
-      <div>{$dfData.heading}</div>
+    {#if dfStore.data}
+      <div>{dfStore.data.heading}</div>
     {:else}
       <div>---</div>
     {/if}

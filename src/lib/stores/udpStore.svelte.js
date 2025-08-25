@@ -1,18 +1,23 @@
-// src/lib/stores/udpStore.js
-import { writable, get } from "svelte/store";
+// src/lib/stores/udpStore.svelte.js
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
-export const udpCurrentNumb = writable(0);
-export const udpCurrentMsg = writable(null);
-export const isUdpListening = writable(false);
+// Class-based approach to avoid export reassignment issues
+class UdpState {
+  currentNumb = $state(0);
+  currentMsg = $state(null);
+  isListening = $state(false);
+}
+
+export const udpState = new UdpState();
 
 let unlisten = null;
 let listening = false; // internal guard
 
 export const udpStore = {
   startListening: async (port = 8080) => {
-    if (listening || get(isUdpListening)) {
+    if (listening || udpState.isListening) {
+      // Use class property
       return `Already listening on port ${port}`;
     }
 
@@ -21,36 +26,37 @@ export const udpStore = {
 
       if (typeof result === "string" && result.includes("Already listening")) {
         listening = true;
-        isUdpListening.set(true);
+        udpState.isListening = true; // Update class property
         return result; // reuse backend message
       }
 
       unlisten = await listen("udp-message", (event) => {
         const message = event.payload;
-        udpCurrentMsg.set(message);
+        udpState.currentMsg = message; // Update class property
         if (message.type === "number") {
-          udpCurrentNumb.set(message.data.value);
+          udpState.currentNumb = message.data.value; // Update class property
         }
       });
 
       listening = true;
-      isUdpListening.set(true);
+      udpState.isListening = true; // Update class property
       return `Listening on port ${port}`;
     } catch (error) {
       if (String(error).includes("Already listening")) {
         listening = true;
-        isUdpListening.set(true);
+        udpState.isListening = true; // Update class property
         return `Already listening on port ${port}`;
       }
 
       listening = false;
-      isUdpListening.set(false);
+      udpState.isListening = false; // Update class property
       throw new Error(`Failed to start: ${error}`);
     }
   },
 
   stopListening: async () => {
-    if (!listening && !get(isUdpListening)) {
+    if (!listening && !udpState.isListening) {
+      // Use class property
       return "Not listening";
     }
 
@@ -61,10 +67,10 @@ export const udpStore = {
       }
       await invoke("stop_udp_listener");
       listening = false;
-      isUdpListening.set(false);
+      udpState.isListening = false; // Update class property
 
-      udpCurrentNumb.set(null);
-      udpCurrentMsg.set(null);
+      udpState.currentNumb = null; // Update class property
+      udpState.currentMsg = null; // Update class property
 
       return "Stopped listening";
     } catch (error) {
