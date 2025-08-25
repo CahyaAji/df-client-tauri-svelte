@@ -14,7 +14,7 @@
   let appInitialized = false;
 
   let isChangingFreq = $state(false);
-  let prevFreq = $state(null);
+  let prevFreq = $state(0);
 
   /**
    * @param {number} [newFreq]
