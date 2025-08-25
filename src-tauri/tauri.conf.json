@@ -20,7 +20,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' http://192.168.17.17:8087; script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+            "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: tauri: http: https: ws: wss:; connect-src 'self' ipc: tauri: http: https: ws: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' 'unsafe-hashes'; img-src 'self' data: blob: http: https:; font-src 'self' data: http: https:; frame-src 'self' http: https:; worker-src 'self' blob:; child-src 'self' http: https:"
     }
   },
   "bundle": {
