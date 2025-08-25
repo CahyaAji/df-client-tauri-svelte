@@ -95,9 +95,9 @@
 
       try {
         const result = await udpStore.startListening(55555);
-        console.log("Parent mount:", result); // Just log, don't assign to udpNotif
+        console.log("Parent mount:", result);
       } catch (err) {
-        console.log("UDP error:", err.message); // Just log, don't assign to udpNotif
+        console.log("UDP error:", err.message);
       }
     }
 
@@ -110,9 +110,9 @@
       );
       try {
         const result = await udpStore.stopListening();
-        console.log("Parent destroy:", result); // Just log, don't assign to udpNotif
+        console.log("Parent destroy:", result);
       } catch (err) {
-        console.log("UDP stop error:", err.message); // Just log, don't assign to udpNotif
+        console.log("UDP stop error:", err.message);
       }
     };
   });
