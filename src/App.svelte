@@ -10,7 +10,6 @@
   import { signalState } from "./lib/stores/signalState.svelte";
   import { untrack } from "svelte";
 
-  // Module-level flag to survive HMR
   let appInitialized = false;
 
   let isChangingFreq = $state(false);
@@ -37,6 +36,7 @@
       const result = await setFreqGainApi(apiData);
       if (result.success) {
         prevFreq = newFreq;
+        signalState.setFrequency(newFreq);
       } else {
         console.error("API call failed:", result.error);
       }
@@ -48,8 +48,35 @@
     }
   }
 
+  // UDP management based on auto mode
   $effect(() => {
-    console.log("Frequency effect running, currentNumb:", udpState.currentNumb);
+    if (signalState.autoMode) {
+      if (!udpState.isListening) {
+        udpStore
+          .startListening(55555)
+          .then((result) => console.log("UDP started:", result))
+          .catch((error) => console.log("UDP error:", error.message));
+      }
+    } else {
+      if (udpState.isListening) {
+        udpStore
+          .stopListening()
+          .then((result) => console.log("UDP stopped:", result))
+          .catch((error) => console.log("UDP stop error:", error.message));
+      }
+    }
+  });
+
+  // Frequency processing - only in auto mode
+  $effect(() => {
+    console.log(
+      "Frequency effect running, currentNumb:",
+      udpState.currentNumb,
+      "autoMode:",
+      signalState.autoMode
+    );
+
+    if (!signalState.autoMode) return; // Skip processing in manual mode
 
     if (
       udpState.currentNumb >= 24000000 &&
@@ -73,7 +100,6 @@
     }
   });
 
-  // Mount/Destroy effect - start services once and let them run
   $effect(() => {
     console.log("Main effect running, appInitialized:", appInitialized);
 
@@ -100,21 +126,17 @@
         const savedDFSettings = await getDFSettings();
         signalState.setFrequency(Number(savedDFSettings.center_freq || 0));
         signalState.setGain(Number(savedDFSettings.uniform_gain || 0));
+        console.log("Initial settings loaded:", savedDFSettings);
       } catch (error) {
         console.log("Failed to load initial setting config:", error);
       }
 
-      try {
-        const result = await udpStore.startListening(55555);
-        console.log("Parent mount:", result);
-      } catch (err) {
-        console.log("UDP error:", err.message);
-      }
+      // UDP will be managed by the autoMode effect, not here
+      console.log("App initialization completed");
     }
 
     initialize();
 
-    // Cleanup - only clean up UDP, let dfStore run until process ends
     return async () => {
       console.log(
         "Effect cleanup running - this should only happen on component unmount"

@@ -1,50 +1,85 @@
 <script>
-  import { udpState, udpStore } from "../stores/udpStore.svelte";
+  import { udpState } from "../stores/udpStore.svelte";
+  import { signalState } from "../stores/signalState.svelte";
+  import { setFreqGainApi } from "../utils/apihandler";
 
-  let isModeAuto = $state(true);
+  let isModeAuto = $state(signalState.autoMode);
   let currentFrequency = $state(0);
-  let currentFreqMhz = $state(0);
-  let currentGain = $state(0);
-  const udpPort = 55555;
+  let currentFreqMhz = $state(signalState.currentFreq);
+  let currentGain = $state(signalState.currentGain);
 
+  // Sync local mode with global state
+  $effect(() => {
+    signalState.setAutoMode(isModeAuto);
+  });
+
+  // Only sync global -> local when switching to auto mode
   $effect(() => {
     if (isModeAuto) {
-      if (!udpState.isListening) {
-        udpStore
-          .startListening(udpPort)
-          .then((result) => console.log("UDP started:", result))
-          .catch((error) => console.log("Error starting UDP:", error.message));
-      }
-    } else {
-      if (udpState.isListening) {
-        udpStore
-          .stopListening()
-          .then((result) => console.log("UDP stopped:", result))
-          .catch((error) => console.log("Error stopping UDP:", error.message));
-      }
+      // When switching TO auto mode, sync from global state
+      currentFreqMhz = signalState.currentFreq;
     }
   });
 
+  // Update local frequency display from UDP in auto mode
   $effect(() => {
     if (
-      isModeAuto &&
+      signalState.autoMode &&
       udpState.currentNumb !== null &&
       currentFrequency !== udpState.currentNumb
     ) {
       currentFrequency = udpState.currentNumb;
       currentFreqMhz = Number((currentFrequency / 1000000).toFixed(3));
-      console.log("Updated frequency from UDP:", currentFrequency);
+      console.log("Updated frequency display from UDP:", currentFrequency);
     }
   });
 
-  function handleFrequencySet() {
+  async function handleFrequencySet() {
     if (!isModeAuto) {
-      console.log("Manual set frequency to:", currentFrequency);
+      signalState.setFrequency(currentFreqMhz);
+
+      const antSpace = currentFreqMhz >= 250 ? 0.25 : 0.45;
+
+      try {
+        const apiData = {
+          center_freq: currentFreqMhz,
+          uniform_gain: currentGain,
+          ant_spacing_meters: antSpace,
+        };
+        const result = await setFreqGainApi(apiData);
+        if (result.success) {
+          console.log("Manual frequency set:", result);
+        } else {
+          console.error("API call failed:", result.error);
+        }
+      } catch (error) {
+        console.error("handleFrequencySet error:", error);
+      }
     }
   }
 
-  function handleGainSet() {
-    console.log("Set gain to:", currentGain);
+  async function handleGainSet() {
+    signalState.setGain(currentGain);
+
+    // Use current frequency from global state to avoid conflicts
+    const currentFreq = signalState.currentFreq;
+    const antSpace = currentFreq >= 250 ? 0.25 : 0.45;
+
+    try {
+      const apiData = {
+        center_freq: currentFreq,
+        uniform_gain: currentGain,
+        ant_spacing_meters: antSpace,
+      };
+      const result = await setFreqGainApi(apiData);
+      if (result.success) {
+        console.log("Manual gain set:", result);
+      } else {
+        console.error("API call failed:", result.error);
+      }
+    } catch (error) {
+      console.error("handleGainSet error:", error);
+    }
   }
 </script>
 
@@ -75,9 +110,11 @@
             type="number"
             step="0.001"
             bind:value={currentFreqMhz}
+            disabled={isModeAuto}
           />
           <span>MHz</span>
-          <button onclick={handleFrequencySet}>Set</button>
+          <button onclick={handleFrequencySet} disabled={isModeAuto}>Set</button
+          >
         </label>
       </div>
     </div>
@@ -114,7 +151,7 @@
           <option value={48.0}>48.0</option>
           <option value={49.6}>49.6</option>
         </select>
-        <button>Set</button>
+        <button onclick={handleGainSet}>Set</button>
       </label>
     </div>
   </div>
@@ -142,9 +179,20 @@
   button {
     padding: 4px 12px;
   }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .input-freq {
     padding: 4px 8px;
     width: 110px;
+  }
+
+  .input-freq:disabled {
+    background-color: #333;
+    color: #888;
   }
 
   .gain-setting {
