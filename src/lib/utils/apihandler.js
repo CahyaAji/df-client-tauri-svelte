@@ -33,23 +33,49 @@ export const readDF = async () => {
   }
 };
 
+export const getDFSettings = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/settings`);
+    const result = await response.json();
+
+    const filteredResult = {
+      center_freq: result.center_freq,
+      uniform_gain: result.uniform_gain,
+    };
+
+    return filteredResult;
+  } catch (error) {
+    console.error("Failed to fetch initial signal config:", error);
+    throw error;
+  }
+};
+
 export const setFreqGainApi = async (
   /** @type {{center_freq: number, uniform_gain: number, ant_spacing_meters: number}} */ data
 ) => {
   try {
-    const response = await fetch(API_URL + "/api/settings/freq", {
+    const response = await fetch(`${API_URL}/api/settings/freq`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    if (response.status === 200) {
+
+    if (response.ok) {
       const jsonResponse = await response.json();
       console.log("setFreqGainApi success: ", jsonResponse);
+      return { success: true, data: jsonResponse };
+    } else {
+      const errorText = await response.text();
+      console.error(
+        `setFreqGainApi HTTP error ${response.status}: ${errorText}`
+      );
+      return { success: false, error: `HTTP ${response.status}: ${errorText}` };
     }
   } catch (error) {
-    console.error("Error setFreqGainApi: ", error);
+    console.error("setFreqGainApi network error: ", error);
+    return { success: false, error: error.message };
   }
 };
 

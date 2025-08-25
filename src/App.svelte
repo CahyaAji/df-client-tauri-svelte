@@ -5,8 +5,10 @@
   import StatusWebv from "./lib/components/StatusWebv.svelte";
 
   import { dfStore } from "./lib/stores/dfStore.svelte.js";
-  import { setFreqGainApi } from "./lib/utils/apihandler.js";
+  import { getDFSettings, setFreqGainApi } from "./lib/utils/apihandler.js";
   import { udpState, udpStore } from "./lib/stores/udpStore.svelte.js";
+  import { signalState } from "./lib/stores/signalState.svelte";
+  import { untrack } from "svelte";
 
   // Module-level flag to survive HMR
   let appInitialized = false;
@@ -16,24 +18,28 @@
 
   /**
    * @param {number} [newFreq]
+   * @param {number} [newGain]
    */
-  async function handleSetFreq(newFreq) {
+  async function handleSetFreq(newFreq, newGain) {
     if (isChangingFreq || newFreq === prevFreq) return;
 
     isChangingFreq = true;
-    prevFreq = newFreq;
 
     const antSpace = newFreq >= 250 ? 0.25 : 0.45;
 
     try {
       const apiData = {
         center_freq: newFreq,
-        uniform_gain: 0,
+        uniform_gain: newGain,
         ant_spacing_meters: antSpace,
       };
       console.log("handleSetFreq called, freq: ", apiData);
       const result = await setFreqGainApi(apiData);
-      console.log("handleSetFreq result:", result);
+      if (result.success) {
+        prevFreq = newFreq;
+      } else {
+        console.error("API call failed:", result.error);
+      }
     } catch (error) {
       console.error("App.svelte Error handleSetFreq:", error);
     } finally {
@@ -49,7 +55,7 @@
       udpState.currentNumb >= 24000000 &&
       udpState.currentNumb <= 1000000000
     ) {
-      const freqInMhz = (udpState.currentNumb / 1000000).toFixed(3);
+      const freqInMhz = Number((udpState.currentNumb / 1000000).toFixed(3));
       console.log(
         "Checking frequency:",
         freqInMhz,
@@ -59,13 +65,10 @@
         prevFreq
       );
 
-      if (
-        udpState.isListening &&
-        freqInMhz !== null &&
-        freqInMhz !== prevFreq
-      ) {
+      if (udpState.isListening && freqInMhz !== prevFreq) {
+        const currentGain = untrack(() => signalState.currentGain);
         console.log("Calling handleSetFreq with:", freqInMhz);
-        handleSetFreq(Number(freqInMhz));
+        handleSetFreq(freqInMhz, currentGain);
       }
     }
   });
@@ -91,6 +94,14 @@
         console.log("DF Store started - will run until app closes");
       } else {
         console.log("dfStore already running");
+      }
+
+      try {
+        const savedDFSettings = await getDFSettings();
+        signalState.setFrequency(Number(savedDFSettings.center_freq || 0));
+        signalState.setGain(Number(savedDFSettings.uniform_gain || 0));
+      } catch (error) {
+        console.log("Failed to load initial setting config:", error);
       }
 
       try {
