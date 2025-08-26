@@ -111,7 +111,6 @@
     }
 
     async function initialize() {
-      console.log("Initializing app...");
       appInitialized = true;
 
       if (!dfStore.isRunning) {
@@ -126,12 +125,12 @@
         const savedDFSettings = await getDFSettings();
         signalState.setFrequency(Number(savedDFSettings.center_freq || 0));
         signalState.setGain(Number(savedDFSettings.uniform_gain || 0));
+        signalState.setStationName(savedDFSettings.station_id);
         console.log("Initial settings loaded:", savedDFSettings);
       } catch (error) {
         console.log("Failed to load initial setting config:", error);
       }
 
-      // UDP will be managed by the autoMode effect, not here
       console.log("App initialization completed");
     }
 

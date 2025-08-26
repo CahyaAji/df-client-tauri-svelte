@@ -1,7 +1,7 @@
 import { fetch } from "@tauri-apps/plugin-http";
 
-// export const API_URL = "http://192.168.17.17:8087";
-export const API_URL = "http://localhost:3000";
+export const API_URL = "http://192.168.17.17:8087";
+// export const API_URL = "http://localhost:3000";
 
 export const readDF = async () => {
   try {
@@ -81,7 +81,12 @@ export const setFreqGainApi = async (
 
 export const turnOffDf = async () => {
   try {
-    const response = await fetch(API_URL + "/api/shutdown");
+    await fetch(API_URL + "/api/shutdown", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   } catch (error) {
     console.error("Error TurnOffDF: ", error);
   } finally {
@@ -93,11 +98,39 @@ export const turnOffDf = async () => {
 
 export const restartDf = async () => {
   try {
+    await fetch(API_URL + "/api/restart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   } catch (error) {
     console.error("Error RestartDF: ", error);
   } finally {
     setTimeout(() => {
       console.log("restarting DF App");
     }, 2000);
+  }
+};
+
+export const setStationId = async (nameId) => {
+  const stationId = {
+    id: nameId,
+  };
+  try {
+    const response = await fetch(API_URL + "/api/settings/station_id", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(stationId),
+    });
+    if (response.status === 200) {
+      const jsonResponse = await response.json();
+      return jsonResponse;
+    }
+  } catch (error) {
+    console.log("Error setStationId: ", error);
+    throw error;
   }
 };
