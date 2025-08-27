@@ -10,6 +10,10 @@
     >
       <div class="arrow"></div>
     </div>
+  {:else}
+    <div class="rotating-circle" style="display: none;">
+      <div class="arrow"></div>
+    </div>
   {/if}
   <div class="angle-text">
     {#if dfStore.data}
