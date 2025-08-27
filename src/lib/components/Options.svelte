@@ -9,56 +9,69 @@
   let dfName = $state("");
   let isShuttingDown = $state(false);
 
-  // Initialize dfName from store (one-way sync: store -> local)
+  // (one-way sync: store -> local)
   $effect(() => {
     dfName = signalState.stationName;
   });
 
-  async function handleTurnOff() {
-    if (isShuttingDown) {
-      console.log("Shutdown already in progress");
-      return;
-    }
-
+  async function closeApp() {
+    if (isShuttingDown) return;
     isShuttingDown = true;
 
+    console.log("Closing application...");
+
     try {
-      console.log("Turning off DF...");
-      await turnOffDf();
-      console.log("DF turned off successfully");
+      if (udpState.isListening) {
+        console.log("Stopping UDP...");
+        await udpStore.stopListening();
+        console.log("UDP stopped successfully");
+      }
 
-      // Wait a moment for DF to fully shut down
-      setTimeout(async () => {
-        try {
-          console.log("Shutting down services and closing app...");
-
-          if (udpState.isListening) {
-            await udpStore.stopListening();
-            console.log("UDP stopped");
-          }
-
-          if (dfStore.isRunning) {
-            dfStore.stop();
-            console.log("DF store stopped");
-          }
-
-          console.log("Closing application window...");
-          const appWindow = getCurrentWindow();
-          await appWindow.close();
-        } catch (error) {
-          console.error("Error during shutdown:", error);
-          isShuttingDown = false;
-        }
-      }, 2000);
+      if (dfStore.isRunning) {
+        console.log("Stopping DF store...");
+        dfStore.stop();
+        console.log("DF store stopped successfully");
+      }
     } catch (error) {
-      console.error("Error turning off DF:", error);
-      isShuttingDown = false;
+      console.error("Error during cleanup:", error);
+    }
+
+    // Close app after cleanup
+    try {
+      console.log("Closing window...");
+      const appWindow = getCurrentWindow();
+      await appWindow.close();
+    } catch (error) {
+      console.error("Error closing window:", error);
     }
   }
 
-  function handleRestart() {
-    restartDf();
-    console.log("restarting DF");
+  async function handleTurnOff() {
+    if (isShuttingDown) return;
+
+    console.log("Turning off DF...");
+    try {
+      await turnOffDf();
+      console.log("DF turned off successfully");
+    } catch (error) {
+      console.error("TurnOff DF error:", error);
+    }
+
+    await closeApp();
+  }
+
+  async function handleRestart() {
+    if (isShuttingDown) return;
+
+    console.log("Restarting DF...");
+    try {
+      await restartDf();
+      console.log("DF restarted successfully");
+    } catch (error) {
+      console.error("Restart DF error:", error);
+    }
+
+    await closeApp();
   }
 
   async function handleSetName() {
