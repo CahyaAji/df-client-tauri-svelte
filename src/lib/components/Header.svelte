@@ -2,12 +2,19 @@
   import refreshImg from "../../assets/icons8-refresh-60.png";
   import alignLeftImg from "../../assets/btn-align-left.png";
   import alignRightImg from "../../assets/btn-align-right.png";
+
+  function refreshPage() {
+    window.location.reload();
+  }
 </script>
 
 <div
   style="display: flex; gap: 6px; align-items: center; justify-content: right; padding: 2px 8px; background-color: #222222; border-bottom: 2px solid gray;"
 >
-  <button style="background-image: url({refreshImg});" aria-label="Refresh"
+  <button
+    style="background-image: url({refreshImg});"
+    aria-label="Refresh Page"
+    on:click={refreshPage}
   ></button>
   <button style="background-image: url({alignLeftImg});" aria-label="Align left"
   ></button>
@@ -25,5 +32,16 @@
     justify-content: center;
     background-repeat: no-repeat;
     background-size: cover;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  button:hover {
+    opacity: 0.8;
+  }
+
+  button:active {
+    opacity: 0.6;
   }
 </style>
