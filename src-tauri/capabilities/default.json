@@ -6,6 +6,8 @@
   "permissions": [
     "core:default",
     "core:event:default",
+    "core:app:default",
+    "core:window:allow-close",
     {
       "identifier": "http:default",
       "allow": [
