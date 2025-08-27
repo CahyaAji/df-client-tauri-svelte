@@ -3,22 +3,13 @@
   import { signalState } from "../stores/signalState.svelte";
   import { setFreqGainApi } from "../utils/apihandler";
 
-  let isModeAuto = $state(signalState.autoMode);
+  // Remove all local state copies - use store directly
   let currentFrequency = $state(0);
-  let currentFreqMhz = $state(signalState.currentFreq);
-  let currentGain = $state(signalState.currentGain);
+  let localFreqMhz = $state(0); // Only for manual input field
 
-  // Sync local mode with global state
+  // Initialize local frequency input from store
   $effect(() => {
-    signalState.setAutoMode(isModeAuto);
-  });
-
-  // Only sync global -> local when switching to auto mode
-  $effect(() => {
-    if (isModeAuto) {
-      // When switching TO auto mode, sync from global state
-      currentFreqMhz = signalState.currentFreq;
-    }
+    localFreqMhz = signalState.currentFreq;
   });
 
   // Update local frequency display from UDP in auto mode
@@ -29,21 +20,21 @@
       currentFrequency !== udpState.currentNumb
     ) {
       currentFrequency = udpState.currentNumb;
-      currentFreqMhz = Number((currentFrequency / 1000000).toFixed(3));
+      localFreqMhz = Number((currentFrequency / 1000000).toFixed(3));
       console.log("Updated frequency display from UDP:", currentFrequency);
     }
   });
 
   async function handleFrequencySet() {
-    if (!isModeAuto) {
-      signalState.setFrequency(currentFreqMhz);
+    if (!signalState.autoMode) {
+      signalState.setFrequency(localFreqMhz);
 
-      const antSpace = currentFreqMhz >= 250 ? 0.25 : 0.45;
+      const antSpace = localFreqMhz >= 250 ? 0.25 : 0.45;
 
       try {
         const apiData = {
-          center_freq: currentFreqMhz,
-          uniform_gain: currentGain,
+          center_freq: localFreqMhz,
+          uniform_gain: signalState.currentGain,
           ant_spacing_meters: antSpace,
         };
         const result = await setFreqGainApi(apiData);
@@ -59,16 +50,14 @@
   }
 
   async function handleGainSet() {
-    signalState.setGain(currentGain);
-
-    // Use current frequency from global state to avoid conflicts
+    // Use current frequency from global state
     const currentFreq = signalState.currentFreq;
     const antSpace = currentFreq >= 250 ? 0.25 : 0.45;
 
     try {
       const apiData = {
         center_freq: currentFreq,
-        uniform_gain: currentGain,
+        uniform_gain: signalState.currentGain,
         ant_spacing_meters: antSpace,
       };
       const result = await setFreqGainApi(apiData);
@@ -91,16 +80,28 @@
       Frequency Setting
     </div>
     <div class="frequency-setting">
-      <div style="display: flex; margin: 4px 0px">
-        <div style="margin-right: 6px;">Frequency Mode :</div>
-        <label style="margin-left: 6px;">
-          <input type="radio" bind:group={isModeAuto} value={true} />
-          Auto
-        </label>
-        <label style="margin-left: 6px;">
-          <input type="radio" bind:group={isModeAuto} value={false} />
-          Manual
-        </label>
+      <div style="display: flex; margin: 4px 0px; align-items: center;">
+        <span style="margin-right: 12px;">Frequency Mode:</span>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input
+              type="radio"
+              checked={signalState.autoMode === true}
+              onchange={() => signalState.setAutoMode(true)}
+              name="frequency-mode"
+            />
+            <span>Auto</span>
+          </label>
+          <label class="radio-label">
+            <input
+              type="radio"
+              checked={signalState.autoMode === false}
+              onchange={() => signalState.setAutoMode(false)}
+              name="frequency-mode"
+            />
+            <span>Manual</span>
+          </label>
+        </div>
       </div>
       <div>
         <label>
@@ -109,11 +110,12 @@
             class="input-freq"
             type="number"
             step="0.001"
-            bind:value={currentFreqMhz}
-            disabled={isModeAuto}
+            bind:value={localFreqMhz}
+            disabled={signalState.autoMode}
           />
           <span>MHz</span>
-          <button onclick={handleFrequencySet} disabled={isModeAuto}>Set</button
+          <button onclick={handleFrequencySet} disabled={signalState.autoMode}
+            >Set</button
           >
         </label>
       </div>
@@ -122,7 +124,7 @@
     <div class="gain-setting">
       <label>
         <span style="padding-right: 16px">Gain :</span>
-        <select bind:value={currentGain}>
+        <select bind:value={signalState.currentGain}>
           <option value={0}>0.0</option>
           <option value={0.9}>0.9</option>
           <option value={1.4}>1.4</option>
@@ -200,5 +202,25 @@
     color: white;
     padding: 4px 8px;
     margin: 2px 0;
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 12px;
+  }
+
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .radio-label input[type="radio"] {
+    margin: 0;
+  }
+
+  .radio-label:hover {
+    opacity: 0.8;
   }
 </style>
