@@ -7,7 +7,6 @@ class DFStore {
 
   #interval = null;
 
-  // Add method to check if running
   get isRunning() {
     return this.#interval !== null;
   }
@@ -22,12 +21,14 @@ class DFStore {
       if (result.success) {
         this.data = result.data;
       } else {
+        this.data = null;
         this.error = result.error;
       }
 
       this.isLoading = false;
       return result;
     } catch (error) {
+      this.data = null;
       this.error = error.message;
       this.isLoading = false;
       return { success: false, error: error.message };

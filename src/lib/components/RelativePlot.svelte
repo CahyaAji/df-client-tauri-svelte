@@ -3,21 +3,17 @@
 </script>
 
 <div class="circle-container">
-  {#if dfStore.data}
+  {#if dfStore.data && dfStore.data.heading !== undefined && dfStore.data.heading !== null}
     <div
       class="rotating-circle"
       style="transform: rotate({dfStore.data.heading}deg);"
     >
       <div class="arrow"></div>
     </div>
-  {:else}
-    <div class="rotating-circle" style="display: none;">
-      <div class="arrow"></div>
-    </div>
   {/if}
   <div class="angle-text">
-    {#if dfStore.data}
-      <div>{dfStore.data.heading}</div>
+    {#if dfStore.data && dfStore.data.heading !== undefined && dfStore.data.heading !== null}
+      <div>{dfStore.data.heading}°</div>
     {:else}
       <div>---</div>
     {/if}
@@ -37,6 +33,7 @@
     background-repeat: no-repeat;
     background-size: cover;
     background-color: black;
+    position: relative;
   }
   .rotating-circle {
     height: 210px;
