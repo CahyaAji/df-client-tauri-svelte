@@ -24,3 +24,5 @@ target
 *.sln
 *.sw?
 .prettierrc
+
+*.backup
