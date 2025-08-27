@@ -1,6 +1,7 @@
 ### yg belum
 
 - setAntenna OK
+- hilangkan arrow jika tidak ada data OK
 - compass
 - gps
 - refresh & align button
