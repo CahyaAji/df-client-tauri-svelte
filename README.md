@@ -1,6 +1,6 @@
 ### yg belum
 
-- setAntenna
+- setAntenna OK
 - compass
 - gps
 - refresh & align button
