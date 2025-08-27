@@ -1,11 +1,10 @@
 <script>
   import { udpState } from "../stores/udpStore.svelte";
   import { signalState } from "../stores/signalState.svelte";
-  import { setFreqGainApi } from "../utils/apihandler";
+  import { setFreqGainApi, setAntenna } from "../utils/apihandler";
 
-  // Remove all local state copies - use store directly
   let currentFrequency = $state(0);
-  let localFreqMhz = $state(0); // Only for manual input field
+  let localFreqMhz = $state(0);
 
   // Initialize local frequency input from store
   $effect(() => {
@@ -25,6 +24,27 @@
     }
   });
 
+  /**
+   * @param {number} antSpace
+   */
+  async function handleSetAntenna(antSpace) {
+    console.log(`Setting antenna spacing to ${antSpace}m`);
+
+    try {
+      const result = await setAntenna(antSpace);
+      if (result.success) {
+        console.log(`Antenna spacing set successfully: ${result.data}`);
+        return true;
+      } else {
+        console.log(`Antenna setting failed: ${result.error}`);
+        return false;
+      }
+    } catch (error) {
+      console.log("Error setting antenna:", error);
+      return false;
+    }
+  }
+
   async function handleFrequencySet() {
     if (!signalState.autoMode) {
       signalState.setFrequency(localFreqMhz);
@@ -32,6 +52,19 @@
       const antSpace = localFreqMhz >= 250 ? 0.25 : 0.45;
 
       try {
+        // STEP 1: Set antenna
+        console.log(
+          `Setting antenna spacing to ${antSpace}m for manual frequency ${localFreqMhz}MHz`
+        );
+        const antennaSuccess = await handleSetAntenna(antSpace);
+
+        if (!antennaSuccess) {
+          console.log(
+            "Antenna setting failed, but continuing with frequency setting"
+          );
+        }
+
+        // STEP 2: Set frequency and gain
         const apiData = {
           center_freq: localFreqMhz,
           uniform_gain: signalState.currentGain,
@@ -39,7 +72,9 @@
         };
         const result = await setFreqGainApi(apiData);
         if (result.success) {
-          console.log("Manual frequency set:", result);
+          console.log(
+            `Manual frequency set successfully - Antenna: ${antennaSuccess ? "OK" : "FAILED"}, Frequency: OK`
+          );
         } else {
           console.error("API call failed:", result.error);
         }
@@ -50,7 +85,6 @@
   }
 
   async function handleGainSet() {
-    // Use current frequency from global state
     const currentFreq = signalState.currentFreq;
     const antSpace = currentFreq >= 250 ? 0.25 : 0.45;
 
@@ -62,7 +96,7 @@
       };
       const result = await setFreqGainApi(apiData);
       if (result.success) {
-        console.log("Manual gain set:", result);
+        console.log("Manual gain set successfully");
       } else {
         console.error("API call failed:", result.error);
       }

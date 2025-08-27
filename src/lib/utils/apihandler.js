@@ -41,6 +41,7 @@ export const getDFSettings = async () => {
     const filteredResult = {
       center_freq: result.center_freq,
       uniform_gain: result.uniform_gain,
+      station_id: result.station_id,
     };
 
     return filteredResult;
@@ -132,5 +133,32 @@ export const setStationId = async (nameId) => {
   } catch (error) {
     console.log("Error setStationId: ", error);
     throw error;
+  }
+};
+
+export const setAntenna = async (/** @type {number} */ antSpace) => {
+  let typeAnt = "vhf";
+  if (antSpace <= 0.25) {
+    typeAnt = "uhf";
+  }
+
+  try {
+    const response = await fetch(API_URL + "/api/ant/" + typeAnt, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.status === 200) {
+      const jsonResponse = await response.json();
+      console.log("setAntenna Success: ", jsonResponse);
+      return { success: true, data: jsonResponse };
+    } else {
+      const errorText = await response.text();
+      return { success: false, error: `${response.status}: ${errorText}` };
+    }
+  } catch (error) {
+    console.error("Error: ", error);
+    return { success: false, error: error.message };
   }
 };

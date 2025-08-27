@@ -22,6 +22,7 @@
     try {
       const response = await setStationId(dfName);
       console.log("success setStationName:", JSON.stringify(response));
+      signalState.setStationName(dfName);
     } catch (error) {
       console.log("error setStationName: ", error);
     }

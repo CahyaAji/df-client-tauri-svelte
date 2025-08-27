@@ -5,7 +5,11 @@
   import StatusWebv from "./lib/components/StatusWebv.svelte";
 
   import { dfStore } from "./lib/stores/dfStore.svelte.js";
-  import { getDFSettings, setFreqGainApi } from "./lib/utils/apihandler.js";
+  import {
+    getDFSettings,
+    setFreqGainApi,
+    setAntenna,
+  } from "./lib/utils/apihandler.js";
   import { udpState, udpStore } from "./lib/stores/udpStore.svelte.js";
   import { signalState } from "./lib/stores/signalState.svelte";
 
@@ -19,6 +23,58 @@
   let frequencyDebounceTimer = null;
   const FREQUENCY_DEBOUNCE_MS = 150;
   const MIN_FREQUENCY_CHANGE = 0.001;
+
+  /**
+   * @param {number} antSpace
+   */
+  async function handleSetAntenna(antSpace) {
+    console.log(`Setting antenna spacing to ${antSpace}m`);
+
+    try {
+      const result = await setAntenna(antSpace);
+      if (result.success) {
+        console.log(`Antenna spacing set successfully: ${result.data}`);
+        return true;
+      } else {
+        console.log(`Antenna setting failed: ${result.error}`);
+        return false;
+      }
+    } catch (error) {
+      console.log("Error setting antenna:", error);
+      return false;
+    }
+  }
+
+  /**
+   * @param {number} newFreq
+   * @param {number} newGain
+   * @param {number} antSpace
+   */
+  async function handleSetFreqAndGain(newFreq, newGain, antSpace) {
+    console.log("Setting frequency and gain:", { newFreq, newGain, antSpace });
+
+    try {
+      const apiData = {
+        center_freq: newFreq,
+        uniform_gain: newGain,
+        ant_spacing_meters: antSpace,
+      };
+
+      const result = await setFreqGainApi(apiData);
+      if (result.success) {
+        console.log(`Frequency and gain set successfully`);
+        signalState.setFrequency(newFreq);
+        signalState.setGain(newGain);
+        return true;
+      } else {
+        console.error("Failed to set frequency and gain:", result.error);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error setting frequency and gain:", error);
+      return false;
+    }
+  }
 
   /**
    * @param {number} [newFreq]
@@ -39,59 +95,54 @@
     console.log(`handleSetFreq called, freq: ${newFreq}, retry: ${retryCount}`);
 
     const antSpace = newFreq >= 250 ? 0.25 : 0.45;
+    let antennaSuccess = false;
+    let frequencySuccess = false;
 
     try {
-      const apiData = {
-        center_freq: newFreq,
-        uniform_gain: newGain,
-        ant_spacing_meters: antSpace,
-      };
-      console.log("API call data:", apiData);
-      const result = await setFreqGainApi(apiData);
+      // STEP 1: Always set antenna first
+      console.log(
+        `Setting antenna spacing to ${antSpace}m for frequency ${newFreq}MHz`
+      );
+      antennaSuccess = await handleSetAntenna(antSpace);
 
-      if (result.success) {
+      if (!antennaSuccess) {
+        console.log(
+          "Antenna setting failed, but continuing with frequency setting"
+        );
+      }
+
+      // STEP 2: Set frequency and gain
+      frequencySuccess = await handleSetFreqAndGain(newFreq, newGain, antSpace);
+
+      if (frequencySuccess) {
         prevFreq = newFreq;
         retryCount = 0;
-        signalState.setFrequency(newFreq);
-        console.log(`Frequency successfully set to ${newFreq} MHz`);
+        console.log(
+          `All settings applied successfully - Antenna: ${antennaSuccess ? "OK" : "FAILED"}, Frequency: OK`
+        );
       } else {
-        console.error("API call failed:", result.error);
-
-        if (retryCount < MAX_RETRIES) {
-          retryCount++;
-          console.log(
-            `Retrying in 1 second (attempt ${retryCount}/${MAX_RETRIES})`
-          );
-
-          setTimeout(() => {
-            isChangingFreq = false;
-            handleSetFreq(newFreq, newGain);
-          }, 1000);
-          return;
-        } else {
-          // Max retries reached
-          console.error(
-            `Failed to set frequency after ${MAX_RETRIES} attempts`
-          );
-          retryCount = 0;
-        }
+        throw new Error("Frequency setting failed");
       }
     } catch (error) {
-      console.error("Network error in handleSetFreq:", error);
+      console.error("Error in frequency setting process:", error);
 
+      // Retry logic - retry the entire process (antenna + frequency)
       if (retryCount < MAX_RETRIES) {
         retryCount++;
         console.log(
-          `Retrying after network error (attempt ${retryCount}/${MAX_RETRIES})`
+          `Retrying entire process (attempt ${retryCount}/${MAX_RETRIES})`
         );
 
-        setTimeout(() => {
-          isChangingFreq = false;
-          handleSetFreq(newFreq, newGain);
-        }, 2000);
+        setTimeout(
+          () => {
+            isChangingFreq = false;
+            handleSetFreq(newFreq, newGain);
+          },
+          1000 + retryCount * 500
+        ); // Progressive delay: 1.5s, 2s, 2.5s
         return;
       } else {
-        console.error(`Network error: Failed after ${MAX_RETRIES} attempts`);
+        console.error(`Failed after ${MAX_RETRIES} attempts`);
         retryCount = 0;
       }
     } finally {
