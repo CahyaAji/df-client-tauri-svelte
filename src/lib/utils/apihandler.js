@@ -114,7 +114,7 @@ export const restartDf = async () => {
   }
 };
 
-export const setStationId = async (nameId) => {
+export const setStationId = async (/** @type {string} */ nameId) => {
   const stationId = {
     id: nameId,
   };

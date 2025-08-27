@@ -9,7 +9,7 @@
   let dfName = $state("");
   let isShuttingDown = $state(false);
 
-  // (one-way sync: store -> local)
+  // Initialize dfName from store (one-way sync: store -> local)
   $effect(() => {
     dfName = signalState.stationName;
   });
@@ -20,6 +20,7 @@
 
     console.log("Closing application...");
 
+    // Proper cleanup - wait for critical operations
     try {
       if (udpState.isListening) {
         console.log("Stopping UDP...");
@@ -36,7 +37,11 @@
       console.error("Error during cleanup:", error);
     }
 
-    // Close app after cleanup
+    // Wait 2 seconds before closing
+    console.log("Waiting 2 seconds before closing...");
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Close app after cleanup and delay
     try {
       console.log("Closing window...");
       const appWindow = getCurrentWindow();
@@ -50,13 +55,10 @@
     if (isShuttingDown) return;
 
     console.log("Turning off DF...");
-    try {
-      await turnOffDf();
-      console.log("DF turned off successfully");
-    } catch (error) {
-      console.error("TurnOff DF error:", error);
-    }
+    // Fire-and-forget - don't wait for turnOffDf to complete
+    turnOffDf().catch((error) => console.error("TurnOff DF error:", error));
 
+    // Close app immediately without waiting
     await closeApp();
   }
 
@@ -64,13 +66,10 @@
     if (isShuttingDown) return;
 
     console.log("Restarting DF...");
-    try {
-      await restartDf();
-      console.log("DF restarted successfully");
-    } catch (error) {
-      console.error("Restart DF error:", error);
-    }
+    // Fire-and-forget - don't wait for restartDf to complete
+    restartDf().catch((error) => console.error("Restart DF error:", error));
 
+    // Close app immediately without waiting
     await closeApp();
   }
 
