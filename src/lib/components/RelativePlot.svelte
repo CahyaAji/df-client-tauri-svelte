@@ -13,7 +13,7 @@
   {/if}
   <div class="angle-text">
     {#if dfStore.data && dfStore.data.heading !== undefined && dfStore.data.heading !== null}
-      <div>{dfStore.data.heading}°</div>
+      <div>{dfStore.data.heading}</div>
     {:else}
       <div>---</div>
     {/if}
