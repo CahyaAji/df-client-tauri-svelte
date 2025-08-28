@@ -1,3 +1,7 @@
+<script>
+  import { compassStore } from "../stores/compassStore.svelte";
+</script>
+
 <div class="panel-container">
   <div style="padding: 2px 6px; border-top: 1px solid lightgray; color: white;">
     Options
@@ -5,19 +9,26 @@
   <div class="panel-content">
     <div>
       <div class="circle">
-        <div
-          class="rotating-circle"
-          style="transform: rotate(45deg); transition: transform 0.2s;"
-        >
-          <div class="arrow">
-            <span
-              style="position: relative; top: -20px; right: 3px; text-align: center; font-size: 15pt; color: yellow;"
-              >N</span
-            >
+        {#if compassStore.data && compassStore.data.heading !== undefined && compassStore.data.heading !== null}
+          <div
+            class="rotating-circle"
+            style="transform: rotate({compassStore.data
+              .heading}deg); transition: transform 0.2s;"
+          >
+            <div class="arrow">
+              <span
+                style="position: relative; top: -20px; right: 3px; text-align: center; font-size: 15pt; color: yellow;"
+                >N</span
+              >
+            </div>
           </div>
-        </div>
+        {/if}
       </div>
-      <div class="cmps-value">cmps</div>
+      {#if compassStore.data && compassStore.data.heading !== undefined && compassStore.data.heading !== null}
+        <div class="cmps-value">{compassStore.data.heading}</div>
+      {:else}
+        <div class="cmps-value">--</div>
+      {/if}
     </div>
     <div class="compass-correction">
       <div>Compass Correction</div>
