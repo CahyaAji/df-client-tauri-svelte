@@ -5,6 +5,7 @@
   import StatusWebv from "./lib/components/StatusWebv.svelte";
 
   import { dfStore } from "./lib/stores/dfStore.svelte.js";
+  import { compassStore } from "./lib/stores/compassStore.svelte";
   import {
     getDFSettings,
     setFreqGainApi,
@@ -280,6 +281,12 @@
         console.log("dfStore already running");
       }
 
+      if (!compassStore.isRunning) {
+        console.log("starting compassstore");
+        compassStore.start();
+        console.log("Compass Store started - will run until app closes");
+      }
+
       try {
         const savedDFSettings = await getDFSettings();
         signalState.setFrequency(Number(savedDFSettings.center_freq || 0));
@@ -304,6 +311,10 @@
         clearTimeout(frequencyDebounceTimer);
         frequencyDebounceTimer = null;
       }
+
+      dfStore.stop();
+      compassStore.stop();
+      console.log("Both stores stopped on cleanup");
 
       try {
         const result = await udpStore.stopListening();
