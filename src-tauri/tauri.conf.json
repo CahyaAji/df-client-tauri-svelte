@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "dfclient",
+        "title": "elangdf",
         "width": 400,
         "height": 800,
         "resizable": true,
