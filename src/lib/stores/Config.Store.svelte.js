@@ -127,3 +127,5 @@ class ConfigStore {
     }
   }
 }
+
+export const configStore = new ConfigStore();
