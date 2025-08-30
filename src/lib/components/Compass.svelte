@@ -3,9 +3,7 @@
 </script>
 
 <div class="panel-container">
-  <div style="padding: 2px 6px; border-top: 1px solid lightgray; color: white;">
-    Options
-  </div>
+  <div class="title">Options</div>
   <div class="panel-content">
     <div>
       <div class="circle">
@@ -25,7 +23,7 @@
         {/if}
       </div>
       {#if compassStore.data && compassStore.data.heading !== undefined && compassStore.data.heading !== null}
-        <div class="cmps-value">{compassStore.data.heading}</div>
+        <div class="cmps-value">{Math.round(compassStore.data.heading)}</div>
       {:else}
         <div class="cmps-value">--</div>
       {/if}
@@ -34,7 +32,6 @@
       <div>Compass Correction</div>
       <input type="number" />
       <button>Set</button>
-      <button>Save Config</button>
     </div>
   </div>
 </div>
@@ -43,9 +40,16 @@
   .panel-container {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    border-top: 1px solid lightgray;
+  }
+  .title {
     background-color: #141414;
+    padding: 8px 8px 4px;
+    color: white;
   }
   .panel-content {
+    flex: 1;
     display: grid;
     grid-template-columns: 2fr 3fr;
     background-color: #222222;
@@ -57,13 +61,13 @@
     border-radius: 50%;
     background-color: black;
     border: 1px solid white;
-    width: 90px;
-    height: 90px;
-    margin: 12px auto 8px;
+    width: 86px;
+    height: 86px;
+    margin: 8px auto 6px;
   }
   .rotating-circle {
-    height: 52px;
-    width: 52px;
+    height: 50px;
+    width: 50px;
     border-radius: 50%;
     background-color: transparent;
   }
@@ -79,7 +83,7 @@
     background-color: black;
     color: white;
     font-size: 13pt;
-    padding: 4px 6px;
+    padding: 2px 6px;
     width: 80px;
     margin: 2px auto;
     border-radius: 15px;

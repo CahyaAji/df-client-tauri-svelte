@@ -107,12 +107,8 @@
 </script>
 
 <div class="panel-container">
+  <div class="title">Frequency Setting</div>
   <div class="panel-content">
-    <div
-      style="padding: 4px 8px; border-top: 1px solid lightgray; color: white;"
-    >
-      Frequency Setting
-    </div>
     <div class="frequency-setting">
       <div style="display: flex; margin: 4px 0px; align-items: center;">
         <span style="margin-right: 12px;">Frequency Mode:</span>
@@ -154,7 +150,6 @@
         </label>
       </div>
     </div>
-    <div style="color: white; padding: 4px 8px;">Gain Settings</div>
     <div class="gain-setting">
       <label>
         <span style="padding-right: 16px">Gain :</span>
@@ -198,8 +193,13 @@
     display: flex;
     flex-direction: column;
     background-color: lightgray;
+    border-top: 1px solid lightgray;
   }
-
+  .title {
+    background-color: #141414;
+    color: white;
+    padding: 8px 8px 4px;
+  }
   .panel-content {
     background-color: #141414;
   }

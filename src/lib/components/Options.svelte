@@ -90,9 +90,7 @@
 </script>
 
 <div class="panel-container">
-  <div style="padding: 4px 8px; border-top: 1px solid lightgray; color: white;">
-    Options
-  </div>
+  <div class="title">Options</div>
   <div class="panel-content">
     <label style="margin: 4px 8px;">
       <span>Unit Name :</span>
@@ -133,7 +131,13 @@
   .panel-container {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    border-top: 1px solid lightgray;
+  }
+  .title {
     background-color: #141414;
+    padding: 8px 8px 4px;
+    color: white;
   }
   .panel-content {
     display: flex;
