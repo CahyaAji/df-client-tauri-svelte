@@ -192,6 +192,7 @@
   .panel-container {
     display: flex;
     flex-direction: column;
+    height: 100%;
     background-color: lightgray;
     border-top: 1px solid lightgray;
   }
@@ -202,6 +203,7 @@
   }
   .panel-content {
     background-color: #141414;
+    flex: 1;
   }
 
   .frequency-setting {
