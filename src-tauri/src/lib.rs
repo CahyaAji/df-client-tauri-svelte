@@ -188,6 +188,7 @@ pub fn run() {
             task_handle: Arc::new(Mutex::new(None)),
         })
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_store::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             start_udp_listener,
             stop_udp_listener,

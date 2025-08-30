@@ -25,3 +25,4 @@ tauri = { version = "2.7.0", features = ["devtools"] }
 tauri-plugin-log = "2"
 tauri-plugin-http = "2.5.1"
 tokio = { version = "1.47.1", features = ["net", "rt-multi-thread"] }
+tauri-plugin-store = "2.4.0"

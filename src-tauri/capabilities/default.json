@@ -8,6 +8,7 @@
     "core:event:default",
     "core:app:default",
     "core:window:allow-close",
+    "store:default",
     {
       "identifier": "http:default",
       "allow": [
