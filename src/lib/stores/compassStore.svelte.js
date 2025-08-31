@@ -20,9 +20,11 @@ class CompassStore {
 
       if (result.success) {
         this.data = result.data;
+        this.isLoading = false;
       } else {
         this.data = null;
         this.error = result.error;
+        this.isLoading = false;
       }
     } catch (error) {
       this.data = null;

@@ -301,10 +301,14 @@
       }
 
       // Start CompassStore
-      if (!compassStore.isRunning) {
-        console.log("starting compassstore");
-        compassStore.start();
-        console.log("Compass Store started - will run until app closes");
+      try {
+        if (!compassStore.isRunning) {
+          console.log("starting compassstore");
+          compassStore.start();
+          console.log("Compass Store started - will run until app closes");
+        }
+      } catch (error) {
+        console.log("Error starting compass store:", error);
       }
 
       // Load DF Setting

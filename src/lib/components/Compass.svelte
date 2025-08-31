@@ -1,5 +1,28 @@
 <script>
   import { compassStore } from "../stores/compassStore.svelte";
+  import { configStore } from "../stores/Config.Store.svelte";
+
+  let inputOffset = $state(0);
+
+  let compassOffset = $derived(configStore.compassOffset);
+
+  async function handleSetOffset() {
+    if (inputOffset === null || inputOffset === undefined) {
+      console.warn("offset value is empty");
+      return;
+    }
+
+    const result = await configStore.setCompassOffset(inputOffset);
+    if (result.success) {
+      console.log("Compass offset updated successfully");
+    } else {
+      console.error("Failed to update compass offset:", result.error);
+    }
+  }
+
+  $effect(() => {
+    inputOffset = compassOffset;
+  });
 </script>
 
 <div class="panel-container">
@@ -10,8 +33,8 @@
         {#if compassStore.data && compassStore.data.heading !== undefined && compassStore.data.heading !== null}
           <div
             class="rotating-circle"
-            style="transform: rotate({compassStore.data
-              .heading}deg); transition: transform 0.2s;"
+            style="transform: rotate({compassStore.data.heading +
+              compassOffset}deg); transition: transform 0.2s;"
           >
             <div class="arrow">
               <span
@@ -23,15 +46,27 @@
         {/if}
       </div>
       {#if compassStore.data && compassStore.data.heading !== undefined && compassStore.data.heading !== null}
-        <div class="cmps-value">{Math.round(compassStore.data.heading)}</div>
+        <div class="cmps-value">
+          {Math.round(compassStore.data.heading + compassOffset)}°
+        </div>
       {:else}
         <div class="cmps-value">--</div>
       {/if}
     </div>
     <div class="compass-correction">
-      <div>Compass Correction</div>
-      <input type="number" />
-      <button>Set</button>
+      <div>Compass Correction: {compassOffset}°</div>
+      <input
+        type="number"
+        bind:value={inputOffset}
+        step="0.1"
+        placeholder="Enter Offset"
+      />
+      <button onclick={handleSetOffset} disabled={configStore.isLoading}>
+        {configStore.isLoading ? "Saving..." : "Set"}
+      </button>
+      {#if configStore.error}
+        <div class="error">Error: {configStore.error}</div>
+      {/if}
     </div>
   </div>
 </div>
@@ -102,5 +137,13 @@
   }
   .compass-correction > button {
     padding: 6px 16px;
+  }
+  .compass-correction > button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  .error {
+    color: red;
+    font-size: 12px;
   }
 </style>

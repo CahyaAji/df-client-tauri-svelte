@@ -3,25 +3,23 @@
   import { signalState } from "../stores/signalState.svelte";
   import { setFreqGainApi, setAntenna } from "../utils/apihandler";
 
-  let currentFrequency = $state(0);
-  let localFreqMhz = $state(0);
+  let inputFreqMhz = $state(0);
 
-  // Initialize local frequency input from store
-  $effect(() => {
-    localFreqMhz = signalState.currentFreq;
-  });
+  // Derived values
+  let currentStoreFreq = $derived(signalState.currentFreq);
+  let isAutoMode = $derived(signalState.autoMode);
+  let udpFreqHz = $derived(udpState.currentNumb);
 
-  // Update local frequency display from UDP in auto mode
+  // In auto mode, show UDP frequency; in manual mode, show store frequency
+  let displayFreqMhz = $derived(
+    isAutoMode && udpFreqHz !== null
+      ? Number((udpFreqHz / 1000000).toFixed(3))
+      : currentStoreFreq
+  );
+
+  // Initialize input with current store frequency (for manual mode)
   $effect(() => {
-    if (
-      signalState.autoMode &&
-      udpState.currentNumb !== null &&
-      currentFrequency !== udpState.currentNumb
-    ) {
-      currentFrequency = udpState.currentNumb;
-      localFreqMhz = Number((currentFrequency / 1000000).toFixed(3));
-      console.log("Updated frequency display from UDP:", currentFrequency);
-    }
+    inputFreqMhz = currentStoreFreq;
   });
 
   /**
@@ -46,15 +44,15 @@
   }
 
   async function handleFrequencySet() {
-    if (!signalState.autoMode) {
-      signalState.setFrequency(localFreqMhz);
+    if (!isAutoMode) {
+      signalState.setFrequency(inputFreqMhz);
 
-      const antSpace = localFreqMhz >= 250 ? 0.25 : 0.45;
+      const antSpace = inputFreqMhz >= 250 ? 0.25 : 0.45;
 
       try {
         // STEP 1: Set antenna
         console.log(
-          `Setting antenna spacing to ${antSpace}m for manual frequency ${localFreqMhz}MHz`
+          `Setting antenna spacing to ${antSpace}m for manual frequency ${inputFreqMhz}MHz`
         );
         const antennaSuccess = await handleSetAntenna(antSpace);
 
@@ -66,7 +64,7 @@
 
         // STEP 2: Set frequency and gain
         const apiData = {
-          center_freq: localFreqMhz,
+          center_freq: inputFreqMhz,
           uniform_gain: signalState.currentGain,
           ant_spacing_meters: antSpace,
         };
@@ -116,7 +114,7 @@
           <label class="radio-label">
             <input
               type="radio"
-              checked={signalState.autoMode === true}
+              checked={isAutoMode === true}
               onchange={() => signalState.setAutoMode(true)}
               name="frequency-mode"
             />
@@ -125,7 +123,7 @@
           <label class="radio-label">
             <input
               type="radio"
-              checked={signalState.autoMode === false}
+              checked={isAutoMode === false}
               onchange={() => signalState.setAutoMode(false)}
               name="frequency-mode"
             />
@@ -133,20 +131,31 @@
           </label>
         </div>
       </div>
+
       <div>
         <label>
           <span>Frequency:</span>
-          <input
-            class="input-freq"
-            type="number"
-            step="0.001"
-            bind:value={localFreqMhz}
-            disabled={signalState.autoMode}
-          />
+          {#if isAutoMode}
+            <input
+              class="input-freq"
+              type="number"
+              step="0.001"
+              value={displayFreqMhz}
+              disabled
+              readonly
+            />
+          {:else}
+            <input
+              class="input-freq"
+              type="number"
+              step="0.001"
+              bind:value={inputFreqMhz}
+            />
+          {/if}
           <span>MHz</span>
-          <button onclick={handleFrequencySet} disabled={signalState.autoMode}
-            >Set</button
-          >
+          <button onclick={handleFrequencySet} disabled={isAutoMode}>
+            Set
+          </button>
         </label>
       </div>
     </div>
