@@ -3,7 +3,6 @@
   import PlotContainer from "./lib/components/PlotContainer.svelte";
   import SetupPanel from "./lib/components/SetupPanel.svelte";
   import StatusWebv from "./lib/components/StatusWebv.svelte";
-
   import { dfStore } from "./lib/stores/dfStore.svelte.js";
   import { compassStore } from "./lib/stores/compassStore.svelte";
   import {
@@ -13,6 +12,7 @@
   } from "./lib/utils/apihandler.js";
   import { udpState, udpStore } from "./lib/stores/udpStore.svelte.js";
   import { signalState } from "./lib/stores/signalState.svelte";
+  import { configStore } from "./lib/stores/Config.Store.svelte";
 
   let appInitialized = false;
 
@@ -273,6 +273,25 @@
     async function initialize() {
       appInitialized = true;
 
+      // Load configStore
+      try {
+        const configResult = await configStore.load();
+        if (configResult.success) {
+          console.log(
+            "configStore loaded succesfully:",
+            configStore.allSettings
+          );
+        } else {
+          console.log(
+            "Config load failed, using defaults:",
+            configResult.error
+          );
+        }
+      } catch (error) {
+        console.log("error loading configStore:", error);
+      }
+
+      // Start dfStore
       if (!dfStore.isRunning) {
         console.log("Starting dfStore...");
         dfStore.start();
@@ -281,12 +300,14 @@
         console.log("dfStore already running");
       }
 
+      // Start CompassStore
       if (!compassStore.isRunning) {
         console.log("starting compassstore");
         compassStore.start();
         console.log("Compass Store started - will run until app closes");
       }
 
+      // Load DF Setting
       try {
         const savedDFSettings = await getDFSettings();
         signalState.setFrequency(Number(savedDFSettings.center_freq || 0));
