@@ -54,7 +54,7 @@
       {/if}
     </div>
     <div class="compass-correction">
-      <div>Compass Correction: {compassOffset}°</div>
+      <div>Compass Correction</div>
       <input
         type="number"
         bind:value={inputOffset}
