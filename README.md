@@ -8,8 +8,8 @@
 - refresh & align button OK
 - absolute view OK
 - detail view OK
+- bersihkan console.log, console yg penting2 aja OK
 - tampilkan error message
-- bersihkan console.log, console yg penting2 aja
 
 ### DLL
 
