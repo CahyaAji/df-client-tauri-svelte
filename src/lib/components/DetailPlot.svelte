@@ -1,8 +1,19 @@
 <script>
   import { dfStore } from "../stores/dfStore.svelte.js";
 
-  // Get polar data from dfStore
+  // Get polar data from dfStore - only use if fresh
   let polarData = $derived(dfStore.data?.polar ? [...dfStore.data.polar] : []);
+
+  // Add debugging effect to monitor state changes
+  $effect(() => {
+    console.log("dfStore state changed:", {
+      hasError: !!dfStore.error,
+      hasData: !!dfStore.data,
+      isLoading: dfStore.isLoading,
+      polarLength: dfStore.data?.polar?.length || 0,
+      error: dfStore.error,
+    });
+  });
 
   // SVG dimensions
   const width = 260;
@@ -54,7 +65,6 @@
   let radarPath = $derived(createRadarPath(polarData));
 </script>
 
-<!-- <div class="circle-container"> -->
 <div class="chart-wrapper">
   {#if polarData.length > 0}
     <svg {width} {height} class="radar-svg">
@@ -66,7 +76,7 @@
           r={circle.r}
           fill="none"
           stroke="white"
-          stroke-width="2"
+          stroke-width="1"
           opacity={circle.opacity}
         />
       {/each}
@@ -95,30 +105,23 @@
   {/if}
 </div>
 
-<!-- </div> -->
-
 <style>
-  /* .circle-container {
-    background-color: aqua;
-    width: ;
-  } */
   .chart-wrapper {
-    display: flex;
     width: 260px;
     height: 260px;
-    margin-top: 8px;
     border-radius: 50%;
     background-color: black;
+    display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     position: relative;
-    pointer-events: none;
+    pointer-events: none; /* Disable all mouse events on the container */
   }
 
   .radar-svg {
     background-color: transparent;
-    pointer-events: none;
+    pointer-events: none; /* Disable all mouse events on the SVG */
   }
 
   .no-data {
