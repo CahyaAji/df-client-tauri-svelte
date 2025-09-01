@@ -314,9 +314,18 @@
       // Load DF Setting
       try {
         const savedDFSettings = await getDFSettings();
-        signalState.setFrequency(Number(savedDFSettings.center_freq || 0));
+        const centerFreq = Number(savedDFSettings.center_freq || 0);
+        signalState.setFrequency(centerFreq);
+
         signalState.setGain(Number(savedDFSettings.uniform_gain || 0));
         signalState.setStationName(savedDFSettings.station_id);
+
+        // setAntenna for initial freq
+        if (centerFreq > 0) {
+          const antSpace = centerFreq >= 250 ? 0.25 : 0.45;
+          await handleSetAntenna(antSpace);
+        }
+
         console.log("Initial settings loaded:", savedDFSettings);
       } catch (error) {
         console.log("Failed to load initial setting config:", error);
