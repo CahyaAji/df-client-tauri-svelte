@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "dfclient-tauri-svelte",
-  "version": "0.1.1",
+  "productName": "ElangDF",
+  "version": "0.1.2",
   "identifier": "com.scm.dfclient",
   "build": {
     "frontendDist": "../dist",
