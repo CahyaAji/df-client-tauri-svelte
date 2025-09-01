@@ -12,7 +12,7 @@
 
   // In auto mode, show UDP frequency; in manual mode, show store frequency
   let displayFreqMhz = $derived(
-    isAutoMode && udpFreqHz !== null
+    isAutoMode && udpFreqHz !== null && udpFreqHz > 0
       ? Number((udpFreqHz / 1000000).toFixed(3))
       : currentStoreFreq
   );
