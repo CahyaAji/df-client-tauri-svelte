@@ -3,18 +3,15 @@
   import { configStore } from "../stores/Config.Store.svelte";
   import * as utm from "utm";
 
-  // Local state for input fields
   let inputLat = $state(0);
   let inputLng = $state(0);
   let isReading = $state(false);
 
-  // UTM fields - now editable
   let inputUtmZone = $state("");
   let inputUtmEasting = $state("");
   let inputUtmNorthing = $state("");
   let inputUtmCO = $state("");
 
-  // Derived values from config store
   let storedLat = $derived(configStore.gpsLocation.lat);
   let storedLng = $derived(configStore.gpsLocation.lng);
   let storedUtmZone = $derived(configStore.utmLocation.zone);
@@ -22,7 +19,6 @@
   let storedUtmNorthing = $derived(configStore.utmLocation.northing);
   let storedUtmCO = $derived(configStore.utmLocation.co);
 
-  // Initialize inputs with stored values only on first load
   let initialized = $state(false);
 
   $effect(() => {
@@ -42,7 +38,6 @@
     if (isReading) return;
 
     isReading = true;
-    console.log("Starting GPS reading with retry logic...");
 
     const MAX_RETRIES = 10;
     const RETRY_INTERVAL = 3000; // 3 seconds
@@ -51,51 +46,35 @@
     try {
       while (attempt < MAX_RETRIES) {
         attempt++;
-        console.log(`GPS reading attempt ${attempt}/${MAX_RETRIES}`);
 
         const result = await readGPS();
 
         if (result.success && result.data) {
-          // Debug: Log the full response structure
-          console.log(
-            `Attempt ${attempt} - Full GPS response:`,
-            JSON.stringify(result.data, null, 2)
-          );
-
           let gpsData = result.data;
-
-          // Check if data is a JSON string and parse it
           if (typeof result.data === "string") {
-            console.log("Data is string, parsing JSON...");
             gpsData = JSON.parse(result.data);
             console.log("Parsed GPS data:", gpsData);
           }
 
-          // Now extract coordinates from the parsed data
           let lat = 0;
           let lng = 0;
 
-          // If parsed data has nested structure
           if (gpsData.data) {
             lat = Number(gpsData.data.lat) || 0;
             lng = Number(gpsData.data.lng) || 0;
           } else {
-            // Direct structure
             lat = Number(gpsData.lat) || 0;
             lng = Number(gpsData.lng) || 0;
           }
 
-          console.log(`Attempt ${attempt} - Extracted coordinates:`, {
+          console.log(`GPS read Attempt ${attempt} - Extracted coordinates:`, {
             lat,
             lng,
           });
 
-          // Check if coordinates are valid (not 0.00)
           if (lat !== 0 && lng !== 0) {
-            // Success! Update input fields
             inputLat = lat;
             inputLng = lng;
-            console.log(`GPS reading successful on attempt ${attempt}!`);
             return; // Exit the function successfully
           } else {
             console.log(
@@ -109,11 +88,7 @@
           );
         }
 
-        // If this wasn't the last attempt, wait before retrying
         if (attempt < MAX_RETRIES) {
-          console.log(
-            `Waiting ${RETRY_INTERVAL / 1000} seconds before next attempt...`
-          );
           await new Promise((resolve) => setTimeout(resolve, RETRY_INTERVAL));
         }
       }
@@ -122,37 +97,19 @@
       console.error(
         `Failed to get valid GPS coordinates after ${MAX_RETRIES} attempts`
       );
-      alert(
-        `Failed to get valid GPS coordinates after ${MAX_RETRIES} attempts. The GPS sensor may not be receiving a signal.`
-      );
     } catch (error) {
       console.error("Error during GPS reading:", error);
-      alert("Error reading GPS: " + error.message);
     } finally {
       isReading = false;
     }
   }
 
-  // 3. Save GPS function - now saves both GPS and UTM
   async function handleSaveGPS() {
     if (configStore.isLoading) return;
 
-    console.log("Saving GPS and UTM location:", {
-      lat: inputLat,
-      lng: inputLng,
-      utm: {
-        zone: inputUtmZone,
-        easting: inputUtmEasting,
-        northing: inputUtmNorthing,
-        co: inputUtmCO,
-      },
-    });
-
     try {
-      // Save GPS coordinates
       const gpsResult = await configStore.setGPSLocation(inputLat, inputLng);
 
-      // Save UTM coordinates
       const utmResult = await configStore.setUTMLocation(
         inputUtmZone,
         inputUtmEasting,
@@ -168,11 +125,9 @@
         if (!utmResult.success) errors.push("UTM: " + utmResult.error);
 
         console.error("Failed to save location:", errors.join(", "));
-        alert("Failed to save location: " + errors.join(", "));
       }
     } catch (error) {
       console.error("Error saving location:", error);
-      alert("Error saving location: " + error.message);
     }
   }
 
@@ -195,15 +150,7 @@
         return;
       }
 
-      console.log("Converting coordinates to UTM:", {
-        lat: inputLat,
-        lng: inputLng,
-      });
-
-      // Convert lat/lng to UTM using the utm package
       const utmResult = utm.fromLatLon(inputLat, inputLng);
-
-      console.log("UTM conversion result:", utmResult);
 
       // Update UTM fields with converted values
       inputUtmZone = `${utmResult.zoneNum}${utmResult.zoneLetter}`;
@@ -215,16 +162,8 @@
       const strCON = Math.round(utmResult.northing).toString();
 
       inputUtmCO = `${strCOE.substring(1, strCOE.length - 1)}, ${strCON.substring(2, strCON.length - 1)}`;
-
-      console.log("UTM values updated:", {
-        zone: inputUtmZone,
-        easting: inputUtmEasting,
-        northing: inputUtmNorthing,
-        co: inputUtmCO,
-      });
     } catch (error) {
       console.error("Error converting to UTM:", error);
-      alert("Error converting coordinates to UTM: " + error.message);
     }
   }
 </script>

@@ -29,12 +29,9 @@
    * @param {number} antSpace
    */
   async function handleSetAntenna(antSpace) {
-    console.log(`Setting antenna spacing to ${antSpace}m`);
-
     try {
       const result = await setAntenna(antSpace);
       if (result.success) {
-        console.log(`Antenna spacing set successfully: ${result.data}`);
         return true;
       } else {
         console.log(`Antenna setting failed: ${result.error}`);
@@ -52,8 +49,6 @@
    * @param {number} antSpace
    */
   async function handleSetFreqAndGain(newFreq, newGain, antSpace) {
-    console.log("Setting frequency and gain:", { newFreq, newGain, antSpace });
-
     try {
       const apiData = {
         center_freq: newFreq,
@@ -63,7 +58,6 @@
 
       const result = await setFreqGainApi(apiData);
       if (result.success) {
-        console.log(`Frequency and gain set successfully`);
         signalState.setFrequency(newFreq);
         signalState.setGain(newGain);
         return true;
@@ -172,13 +166,6 @@
   });
 
   $effect(() => {
-    console.log(
-      "Frequency effect running, currentNumb:",
-      udpState.currentNumb,
-      "autoMode:",
-      signalState.autoMode
-    );
-
     if (!signalState.autoMode) {
       // Clear any pending debounced calls
       if (frequencyDebounceTimer) {
@@ -253,7 +240,6 @@
 
     return () => {
       if (frequencyDebounceTimer) {
-        console.log("Cleaning up frequency debounce timer");
         clearTimeout(frequencyDebounceTimer);
         frequencyDebounceTimer = null;
       }
@@ -303,7 +289,6 @@
       // Start CompassStore
       try {
         if (!compassStore.isRunning) {
-          console.log("starting compassstore");
           compassStore.start();
           console.log("Compass Store started - will run until app closes");
         }
@@ -337,10 +322,6 @@
     initialize();
 
     return async () => {
-      console.log(
-        "Effect cleanup running - this should only happen on component unmount"
-      );
-
       if (frequencyDebounceTimer) {
         clearTimeout(frequencyDebounceTimer);
         frequencyDebounceTimer = null;
@@ -348,7 +329,6 @@
 
       dfStore.stop();
       compassStore.stop();
-      console.log("Both stores stopped on cleanup");
 
       try {
         const result = await udpStore.stopListening();

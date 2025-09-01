@@ -5,7 +5,6 @@
 
   let inputFreqMhz = $state(0);
 
-  // Derived values
   let currentStoreFreq = $derived(signalState.currentFreq);
   let isAutoMode = $derived(signalState.autoMode);
   let udpFreqHz = $derived(udpState.currentNumb);
@@ -26,8 +25,6 @@
    * @param {number} antSpace
    */
   async function handleSetAntenna(antSpace) {
-    console.log(`Setting antenna spacing to ${antSpace}m`);
-
     try {
       const result = await setAntenna(antSpace);
       if (result.success) {
@@ -51,9 +48,6 @@
 
       try {
         // STEP 1: Set antenna
-        console.log(
-          `Setting antenna spacing to ${antSpace}m for manual frequency ${inputFreqMhz}MHz`
-        );
         const antennaSuccess = await handleSetAntenna(antSpace);
 
         if (!antennaSuccess) {
