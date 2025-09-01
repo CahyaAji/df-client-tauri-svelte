@@ -61,7 +61,6 @@ export const getDFSettings = async () => {
 
     return filteredResult;
   } catch (error) {
-    console.error("Failed to fetch initial signal config:", error);
     throw error;
   }
 };
@@ -80,17 +79,12 @@ export const setFreqGainApi = async (
 
     if (response.ok) {
       const jsonResponse = await response.json();
-      console.log("setFreqGainApi success: ", jsonResponse);
       return { success: true, data: jsonResponse };
     } else {
       const errorText = await response.text();
-      console.error(
-        `setFreqGainApi HTTP error ${response.status}: ${errorText}`
-      );
       return { success: false, error: `HTTP ${response.status}: ${errorText}` };
     }
   } catch (error) {
-    console.error("setFreqGainApi network error: ", error);
     return { success: false, error: error.message };
   }
 };
@@ -146,7 +140,6 @@ export const setStationId = async (/** @type {string} */ nameId) => {
       return jsonResponse;
     }
   } catch (error) {
-    console.log("Error setStationId: ", error);
     throw error;
   }
 };
@@ -166,14 +159,12 @@ export const setAntenna = async (/** @type {number} */ antSpace) => {
     });
     if (response.status === 200) {
       const jsonResponse = await response.json();
-      console.log("setAntenna Success: ", jsonResponse);
       return { success: true, data: jsonResponse };
     } else {
       const errorText = await response.text();
       return { success: false, error: `${response.status}: ${errorText}` };
     }
   } catch (error) {
-    console.error("Error: ", error);
     return { success: false, error: error.message };
   }
 };
