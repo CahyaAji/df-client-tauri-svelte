@@ -6,8 +6,8 @@
 - gps OK
 - close ketika df dimatikan & restart OK
 - refresh & align button OK
-- absolute view
-- detail view
+- absolute view OK
+- detail view OK
 - tampilkan error message
 
 ### DLL
