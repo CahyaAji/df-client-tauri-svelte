@@ -2,11 +2,13 @@
 
 - setAntenna OK
 - hilangkan arrow jika tidak ada data OK
-- compass
-- gps
-- refresh & align button
+- compass OK
+- gps OK
+- close ketika df dimatikan & restart OK
+- refresh & align button OK
+- absolute view
+- detail view
 - tampilkan error message
-- close ketika df dimatikan & restart
 
 ### DLL
 
