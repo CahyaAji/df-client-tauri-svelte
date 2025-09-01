@@ -341,7 +341,7 @@
 </script>
 
 <main
-  style="display: grid; grid-template-rows: 40px 4fr 4fr 3fr; height: 100vh;"
+  style="display: grid; grid-template-rows: 40px 3fr 4fr 3fr; height: 100vh;"
 >
   <Header />
   <StatusWebv />
