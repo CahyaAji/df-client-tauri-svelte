@@ -24,20 +24,20 @@
   .circle-container {
     display: flex;
     margin-top: 8px;
-    width: 280px;
-    height: 280px;
+    width: 260px;
+    height: 260px;
     border-radius: 50%;
     align-items: center;
     justify-content: center;
-    background-image: url("/src/assets/relative-circle.png");
+    background-image: url("/src/assets/absolute-circle.png");
     background-repeat: no-repeat;
     background-size: cover;
     background-color: black;
     position: relative;
   }
   .rotating-circle {
-    height: 210px;
-    width: 210px;
+    height: 200px;
+    width: 200px;
     border-radius: 50%;
     background-color: transparent;
   }
