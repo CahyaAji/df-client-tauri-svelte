@@ -3,6 +3,7 @@ import { LazyStore } from "@tauri-apps/plugin-store";
 class ConfigStore {
   compassOffset = $state(0);
   gpsLocation = $state({ lat: 0, lng: 0 });
+  utmLocation = $state({ zone: "", easting: "", northing: "", co: "" });
 
   #store = null;
   #isLoading = $state(false);
@@ -20,6 +21,7 @@ class ConfigStore {
     return {
       compassOffset: this.compassOffset,
       gpsLocation: this.gpsLocation,
+      utmLocation: this.utmLocation,
     };
   }
 
@@ -39,9 +41,16 @@ class ConfigStore {
 
       const compassOffset = await store.get("compassOffset");
       const gpsLocation = await store.get("gpsLocation");
+      const utmLocation = await store.get("utmLocation");
 
       this.compassOffset = compassOffset ?? 0;
       this.gpsLocation = gpsLocation ?? { lat: 0, lng: 0 };
+      this.utmLocation = utmLocation ?? {
+        zone: "",
+        easting: "",
+        northing: "",
+        co: "",
+      };
 
       console.log("Settings loaded successfully:", this.allSettings);
       this.#isLoading = false;
@@ -103,9 +112,40 @@ class ConfigStore {
     const result = await this.#saveToStore("gpsLocation", this.gpsLocation);
     if (!result.success) {
       this.gpsLocation = oldValue;
-      console.error("Failed to save GPS location, reverting to:", oldValue);
+      console.error(
+        "Failed to save GPS location, reverting to:",
+        $state.snapshot(oldValue)
+      );
     } else {
-      console.log("GPS location saved:", this.gpsLocation);
+      console.log("GPS location saved:", $state.snapshot(this.gpsLocation));
+    }
+    return result;
+  }
+
+  /**
+   * @param {string} zone
+   * @param {string} easting
+   * @param {string} northing
+   * @param {string} co
+   */
+  async setUTMLocation(zone, easting, northing, co) {
+    const oldValue = { ...this.utmLocation };
+    this.utmLocation = {
+      zone: String(zone),
+      easting: String(easting),
+      northing: String(northing),
+      co: String(co),
+    };
+
+    const result = await this.#saveToStore("utmLocation", this.utmLocation);
+    if (!result.success) {
+      this.utmLocation = oldValue;
+      console.error(
+        "Failed to save UTM location, reverting to:",
+        $state.snapshot(oldValue)
+      );
+    } else {
+      console.log("UTM location saved:", $state.snapshot(this.utmLocation));
     }
     return result;
   }
@@ -113,6 +153,7 @@ class ConfigStore {
   async reset() {
     this.compassOffset = 0;
     this.gpsLocation = { lat: 0, lng: 0 };
+    this.utmLocation = { zone: "", easting: "", northing: "", co: "" };
 
     try {
       const store = await this.#initStore();
