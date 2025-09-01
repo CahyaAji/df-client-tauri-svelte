@@ -239,6 +239,7 @@
           type="number"
           step="0.000001"
           bind:value={inputLat}
+          lang="en-US"
           disabled={isReading || configStore.isLoading}
         />
       </div>
@@ -248,6 +249,7 @@
           type="number"
           step="0.000001"
           bind:value={inputLng}
+          lang="en-US"
           disabled={isReading || configStore.isLoading}
         />
       </div>
@@ -258,6 +260,7 @@
         <input
           type="text"
           bind:value={inputUtmZone}
+          lang="en-US"
           disabled={isReading || configStore.isLoading}
         />
       </div>
@@ -266,6 +269,7 @@
         <input
           type="text"
           bind:value={inputUtmEasting}
+          lang="en-US"
           disabled={isReading || configStore.isLoading}
         />
       </div>
@@ -274,6 +278,7 @@
         <input
           type="text"
           bind:value={inputUtmNorthing}
+          lang="en-US"
           disabled={isReading || configStore.isLoading}
         />
       </div>

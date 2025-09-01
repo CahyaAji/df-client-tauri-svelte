@@ -140,6 +140,7 @@
               class="input-freq"
               type="number"
               step="0.001"
+              lang="en-US"
               value={displayFreqMhz}
               disabled
               readonly
@@ -148,6 +149,7 @@
             <input
               class="input-freq"
               type="number"
+              lang="en-US"
               step="0.001"
               bind:value={inputFreqMhz}
             />

@@ -59,6 +59,7 @@
         type="number"
         bind:value={inputOffset}
         step="0.1"
+        lang="en-US"
         placeholder="Enter Offset"
       />
       <button onclick={handleSetOffset} disabled={configStore.isLoading}>
