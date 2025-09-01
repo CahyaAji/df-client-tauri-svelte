@@ -1,4 +1,6 @@
 <script>
+  import AbsolutePlot from "./AbsolutePlot.svelte";
+  import DetailPlot from "./DetailPlot.svelte";
   import RelativePlot from "./RelativePlot.svelte";
 
   let activeTab = "relativeTab";
@@ -31,7 +33,13 @@
     </div>
   </div>
   <div class="plot-container">
-    <RelativePlot />
+    {#if activeTab === "relativeTab"}
+      <RelativePlot />
+    {:else if activeTab === "absoluteTab"}
+      <AbsolutePlot />
+    {:else if activeTab === "detailTab"}
+      <DetailPlot />
+    {/if}
   </div>
 </div>
 
