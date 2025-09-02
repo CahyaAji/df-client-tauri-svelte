@@ -9,14 +9,12 @@
   let isAutoMode = $derived(signalState.autoMode);
   let udpFreqHz = $derived(udpState.currentNumb);
 
-  // In auto mode, show UDP frequency; in manual mode, show store frequency
   let displayFreqMhz = $derived(
     isAutoMode && udpFreqHz !== null && udpFreqHz > 0
       ? Number((udpFreqHz / 1000000).toFixed(3))
       : currentStoreFreq
   );
 
-  // Initialize input with current store frequency (for manual mode)
   $effect(() => {
     inputFreqMhz = currentStoreFreq;
   });
