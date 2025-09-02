@@ -10,7 +10,7 @@
 - detail view OK
 - bersihkan console.log, console yg penting2 aja OK
 - zoom in zoom out OK
-- scale factor
+- scale factor OK
 - tampilkan error message
 
 ### DLL
