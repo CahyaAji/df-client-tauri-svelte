@@ -8,6 +8,8 @@
 - refresh & align button OK
 - absolute view OK
 - detail view OK
+- zoom in zoom out OK
+- scale factor
 - tampilkan error message
 
 ### DLL

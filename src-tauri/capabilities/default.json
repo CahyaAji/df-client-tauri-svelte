@@ -12,6 +12,7 @@
     "core:window:allow-outer-size",
     "core:window:allow-primary-monitor",
     "store:default",
+    "core:webview:allow-set-webview-zoom",
     {
       "identifier": "http:default",
       "allow": [
