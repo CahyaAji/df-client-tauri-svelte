@@ -1,19 +1,8 @@
 <script>
   import { dfStore } from "../stores/dfStore.svelte.js";
 
-  // Get polar data from dfStore - only use if fresh
+  // Get polar data from dfStore
   let polarData = $derived(dfStore.data?.polar ? [...dfStore.data.polar] : []);
-
-  // Add debugging effect to monitor state changes
-  $effect(() => {
-    console.log("dfStore state changed:", {
-      hasError: !!dfStore.error,
-      hasData: !!dfStore.data,
-      isLoading: dfStore.isLoading,
-      polarLength: dfStore.data?.polar?.length || 0,
-      error: dfStore.error,
-    });
-  });
 
   // SVG dimensions
   const width = 260;

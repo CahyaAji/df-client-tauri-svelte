@@ -8,6 +8,7 @@
 - refresh & align button OK
 - absolute view OK
 - detail view OK
+- bersihkan console.log, console yg penting2 aja OK
 - zoom in zoom out OK
 - scale factor
 - tampilkan error message

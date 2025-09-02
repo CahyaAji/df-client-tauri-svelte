@@ -29,12 +29,9 @@
    * @param {number} antSpace
    */
   async function handleSetAntenna(antSpace) {
-    console.log(`Setting antenna spacing to ${antSpace}m`);
-
     try {
       const result = await setAntenna(antSpace);
       if (result.success) {
-        console.log(`Antenna spacing set successfully: ${result.data}`);
         return true;
       } else {
         console.log(`Antenna setting failed: ${result.error}`);
@@ -52,8 +49,6 @@
    * @param {number} antSpace
    */
   async function handleSetFreqAndGain(newFreq, newGain, antSpace) {
-    console.log("Setting frequency and gain:", { newFreq, newGain, antSpace });
-
     try {
       const apiData = {
         center_freq: newFreq,
@@ -63,7 +58,6 @@
 
       const result = await setFreqGainApi(apiData);
       if (result.success) {
-        console.log(`Frequency and gain set successfully`);
         signalState.setFrequency(newFreq);
         signalState.setGain(newGain);
         return true;
@@ -172,13 +166,6 @@
   });
 
   $effect(() => {
-    console.log(
-      "Frequency effect running, currentNumb:",
-      udpState.currentNumb,
-      "autoMode:",
-      signalState.autoMode
-    );
-
     if (!signalState.autoMode) {
       // Clear any pending debounced calls
       if (frequencyDebounceTimer) {
@@ -253,7 +240,6 @@
 
     return () => {
       if (frequencyDebounceTimer) {
-        console.log("Cleaning up frequency debounce timer");
         clearTimeout(frequencyDebounceTimer);
         frequencyDebounceTimer = null;
       }
@@ -303,7 +289,6 @@
       // Start CompassStore
       try {
         if (!compassStore.isRunning) {
-          console.log("starting compassstore");
           compassStore.start();
           console.log("Compass Store started - will run until app closes");
         }
@@ -314,9 +299,18 @@
       // Load DF Setting
       try {
         const savedDFSettings = await getDFSettings();
-        signalState.setFrequency(Number(savedDFSettings.center_freq || 0));
+        const centerFreq = Number(savedDFSettings.center_freq || 0);
+        signalState.setFrequency(centerFreq);
+
         signalState.setGain(Number(savedDFSettings.uniform_gain || 0));
         signalState.setStationName(savedDFSettings.station_id);
+
+        // setAntenna for initial freq
+        if (centerFreq > 0) {
+          const antSpace = centerFreq >= 250 ? 0.25 : 0.45;
+          await handleSetAntenna(antSpace);
+        }
+
         console.log("Initial settings loaded:", savedDFSettings);
       } catch (error) {
         console.log("Failed to load initial setting config:", error);
@@ -328,10 +322,6 @@
     initialize();
 
     return async () => {
-      console.log(
-        "Effect cleanup running - this should only happen on component unmount"
-      );
-
       if (frequencyDebounceTimer) {
         clearTimeout(frequencyDebounceTimer);
         frequencyDebounceTimer = null;
@@ -339,7 +329,6 @@
 
       dfStore.stop();
       compassStore.stop();
-      console.log("Both stores stopped on cleanup");
 
       try {
         const result = await udpStore.stopListening();
@@ -352,7 +341,7 @@
 </script>
 
 <main
-  style="display: grid; grid-template-rows: 40px 4fr 4fr 3fr; height: 100vh;"
+  style="display: grid; grid-template-rows: 40px 3fr 4fr 3fr; height: 100vh;"
 >
   <Header />
   <StatusWebv />

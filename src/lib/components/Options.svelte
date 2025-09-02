@@ -23,15 +23,11 @@
     // Proper cleanup - wait for critical operations
     try {
       if (udpState.isListening) {
-        console.log("Stopping UDP...");
         await udpStore.stopListening();
-        console.log("UDP stopped successfully");
       }
 
       if (dfStore.isRunning) {
-        console.log("Stopping DF store...");
         dfStore.stop();
-        console.log("DF store stopped successfully");
       }
     } catch (error) {
       console.error("Error during cleanup:", error);
@@ -43,7 +39,6 @@
 
     // Close app after cleanup and delay
     try {
-      console.log("Closing window...");
       const appWindow = getCurrentWindow();
       await appWindow.close();
     } catch (error) {
@@ -81,7 +76,6 @@
 
     try {
       const response = await setStationId(dfName);
-      console.log("success setStationName:", JSON.stringify(response));
       signalState.setStationName(dfName);
     } catch (error) {
       console.error("error setStationName:", error);
