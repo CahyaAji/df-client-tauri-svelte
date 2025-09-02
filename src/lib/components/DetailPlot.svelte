@@ -1,17 +1,17 @@
 <script>
   import { dfStore } from "../stores/dfStore.svelte.js";
 
-  // Get polar data from dfStore
   let polarData = $derived(dfStore.data?.polar ? [...dfStore.data.polar] : []);
 
-  // SVG dimensions
   const width = 260;
   const height = 260;
   const centerX = width / 2;
   const centerY = height / 2;
   const radius = 100;
 
-  // Convert polar data to SVG path
+  /**
+   * @param {any[]} data
+   */
   function createRadarPath(data) {
     if (!data.length) return "";
 
@@ -20,10 +20,10 @@
     const range = maxValue - minValue || 1; // Avoid division by zero
 
     let path = "";
-    data.forEach((value, index) => {
+    data.forEach((/** @type {number} */ value, /** @type {number} */ index) => {
       const angle =
-        ((index * 360) / data.length) * (Math.PI / 180) - Math.PI / 2; // Start from top
-      const normalizedValue = (value - minValue) / range; // Normalize to 0-1
+        ((index * 360) / data.length) * (Math.PI / 180) - Math.PI / 2;
+      const normalizedValue = (value - minValue) / range;
       const r = normalizedValue * radius;
       const x = centerX + r * Math.cos(angle);
       const y = centerY + r * Math.sin(angle);
@@ -34,7 +34,7 @@
         path += ` L ${x} ${y}`;
       }
     });
-    path += " Z"; // Close the path
+    path += " Z";
     return path;
   }
 
@@ -105,12 +105,12 @@
     justify-content: center;
     overflow: hidden;
     position: relative;
-    pointer-events: none; /* Disable all mouse events on the container */
+    pointer-events: none;
   }
 
   .radar-svg {
     background-color: transparent;
-    pointer-events: none; /* Disable all mouse events on the SVG */
+    pointer-events: none;
   }
 
   .no-data {

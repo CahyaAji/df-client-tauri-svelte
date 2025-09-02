@@ -134,7 +134,7 @@
             handleSetFreq(newFreq, newGain);
           },
           1000 + retryCount * 500
-        ); // Progressive delay: 1.5s, 2s, 2.5s
+        );
         return;
       } else {
         console.error(`Failed after ${MAX_RETRIES} attempts`);
