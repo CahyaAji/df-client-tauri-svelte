@@ -17,11 +17,13 @@
         return;
       }
 
-      const screenWidth = monitor.size.width;
-      const windowSize = await currentWindow.outerSize();
-      // const windowHeight = windowSize.height;
+      const scaleFactor = await currentWindow.scaleFactor();
+      const actualScreenWidth = monitor.size.width / scaleFactor;
 
-      const newX = screenWidth - windowSize.width;
+      // const screenWidth = monitor.size.width;
+      const windowSize = await currentWindow.outerSize();
+
+      const newX = actualScreenWidth - windowSize.width;
       const newY = 0;
       // const newY = Math.floor((monitor.size.height - windowHeight) / 2); // Center vertically
 
