@@ -23,7 +23,7 @@
       // const screenWidth = monitor.size.width;
       const windowSize = await currentWindow.outerSize();
 
-      const newX = actualScreenWidth - windowSize.width;
+      const newX = actualScreenWidth - windowSize.width / scaleFactor;
       const newY = 0;
       // const newY = Math.floor((monitor.size.height - windowHeight) / 2); // Center vertically
 
