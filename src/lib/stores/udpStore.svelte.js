@@ -1,8 +1,6 @@
-// src/lib/stores/udpStore.svelte.js
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
-// Class-based approach to avoid export reassignment issues
 class UdpState {
   currentNumb = $state(0);
   currentMsg = $state(null);
@@ -17,7 +15,6 @@ let listening = false; // internal guard
 export const udpStore = {
   startListening: async (port = 8080) => {
     if (listening || udpState.isListening) {
-      // Use class property
       return `Already listening on port ${port}`;
     }
 
@@ -26,37 +23,36 @@ export const udpStore = {
 
       if (typeof result === "string" && result.includes("Already listening")) {
         listening = true;
-        udpState.isListening = true; // Update class property
-        return result; // reuse backend message
+        udpState.isListening = true;
+        return result;
       }
 
       unlisten = await listen("udp-message", (event) => {
         const message = event.payload;
-        udpState.currentMsg = message; // Update class property
+        udpState.currentMsg = message;
         if (message.type === "number") {
-          udpState.currentNumb = message.data.value; // Update class property
+          udpState.currentNumb = message.data.value;
         }
       });
 
       listening = true;
-      udpState.isListening = true; // Update class property
+      udpState.isListening = true;
       return `Listening on port ${port}`;
     } catch (error) {
       if (String(error).includes("Already listening")) {
         listening = true;
-        udpState.isListening = true; // Update class property
+        udpState.isListening = true;
         return `Already listening on port ${port}`;
       }
 
       listening = false;
-      udpState.isListening = false; // Update class property
+      udpState.isListening = false;
       throw new Error(`Failed to start: ${error}`);
     }
   },
 
   stopListening: async () => {
     if (!listening && !udpState.isListening) {
-      // Use class property
       return "Not listening";
     }
 
@@ -67,10 +63,10 @@ export const udpStore = {
       }
       await invoke("stop_udp_listener");
       listening = false;
-      udpState.isListening = false; // Update class property
+      udpState.isListening = false;
 
-      udpState.currentNumb = null; // Update class property
-      udpState.currentMsg = null; // Update class property
+      udpState.currentNumb = null;
+      udpState.currentMsg = null;
 
       return "Stopped listening";
     } catch (error) {
@@ -78,7 +74,7 @@ export const udpStore = {
     }
   },
 
-  sendNumber: async (number, port = 8080) => {
+  sendNumber: async (/** @type {number} */ number, port = 8080) => {
     if (number < 0 || number > 1000000) {
       throw new Error("Number must be between 0-1000000");
     }

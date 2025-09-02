@@ -4,7 +4,7 @@ class DFStore {
   data = $state(null);
   error = $state(null);
   isLoading = $state(false);
-  lastTimestamp = $state(null); // Track last received timestamp
+  lastTimestamp = $state(null);
 
   #interval = null;
 
@@ -22,23 +22,16 @@ class DFStore {
       if (result.success) {
         const newTimestamp = result.data.time;
 
-        // Check if this is new data by comparing timestamps
         if (
           this.lastTimestamp === null ||
           newTimestamp !== this.lastTimestamp
         ) {
-          // New data - update everything
           this.data = result.data;
           this.lastTimestamp = newTimestamp;
           console.log("New DF data received, timestamp:", newTimestamp);
         } else {
-          // Same timestamp - server returned stale data
           console.log("Stale DF data detected, same timestamp:", newTimestamp);
-          // Don't update this.data, keep using previous data or set to null for real-time behavior
-          // Option 1: Keep last good data
-          // (do nothing)
 
-          // Option 2: Clear data to show "no data" state for true real-time
           this.data = null;
           this.error = "No new data available";
         }
