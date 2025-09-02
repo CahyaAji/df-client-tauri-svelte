@@ -40,7 +40,7 @@
     isReading = true;
 
     const MAX_RETRIES = 10;
-    const RETRY_INTERVAL = 3000; // 3 seconds
+    const RETRY_INTERVAL = 3000;
     let attempt = 0;
 
     try {
@@ -75,7 +75,7 @@
           if (lat !== 0 && lng !== 0) {
             inputLat = lat;
             inputLng = lng;
-            return; // Exit the function successfully
+            return;
           } else {
             console.log(
               `Attempt ${attempt} - Got zero coordinates, retrying...`
@@ -93,7 +93,6 @@
         }
       }
 
-      // If we get here, all attempts failed
       console.error(
         `Failed to get valid GPS coordinates after ${MAX_RETRIES} attempts`
       );
@@ -131,16 +130,13 @@
     }
   }
 
-  // Convert UTM function
   function handleConvertUTM() {
     try {
-      // Check if we have valid lat/lng coordinates
       if (!inputLat || !inputLng || inputLat === 0 || inputLng === 0) {
         alert("Please enter valid latitude and longitude coordinates first");
         return;
       }
 
-      // Validate coordinate ranges
       if (Math.abs(inputLat) > 90) {
         alert("Latitude must be between -90 and 90 degrees");
         return;
@@ -152,12 +148,10 @@
 
       const utmResult = utm.fromLatLon(inputLat, inputLng);
 
-      // Update UTM fields with converted values
       inputUtmZone = `${utmResult.zoneNum}${utmResult.zoneLetter}`;
       inputUtmEasting = utmResult.easting.toFixed(2);
       inputUtmNorthing = utmResult.northing.toFixed(2);
 
-      // Calculate CO (Grid Coordinates) like your React code
       const strCOE = Math.round(utmResult.easting).toString();
       const strCON = Math.round(utmResult.northing).toString();
 
