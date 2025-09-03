@@ -1,10 +1,36 @@
 <script>
+  import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
   import SetFreqGain from "./SetFreqGain.svelte";
   import Options from "./Options.svelte";
   import Compass from "./Compass.svelte";
   import Gps from "./GPS.svelte";
+  import { API_URL } from "../utils/apihandler";
 
   let activeTab = $state("setFreq");
+
+  async function openSpectrum() {
+    const spectrumWindow = new WebviewWindow("spectrum-window", {
+      title: "elangdf - Spectrum",
+      url: `${API_URL}/spectrum`,
+      width: 800,
+      height: 600,
+      resizable: true,
+      center: true,
+    });
+
+    spectrumWindow.once("tauri://created", () => {
+      console.log("Spectrum window created");
+    });
+
+    spectrumWindow.once("tauri://error", (e) => {
+      console.error("Failed to create spectrum window:", e);
+    });
+
+    spectrumWindow.once("tauri://destroyed", () => {
+      console.log("Spectrum window was closed");
+      window.location.reload();
+    });
+  }
 </script>
 
 <div class="panel-container">
@@ -36,6 +62,7 @@
       class:active={activeTab === "options"}
       onclick={() => (activeTab = "options")}>Options</button
     >
+    <button onclick={openSpectrum}>Spectrum</button>
   </div>
 </div>
 
