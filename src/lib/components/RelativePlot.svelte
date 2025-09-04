@@ -29,7 +29,7 @@
     border-radius: 50%;
     align-items: center;
     justify-content: center;
-    background-image: url("/src/assets/absolute-circle.png");
+    background-image: url("/src/assets/relative-circle.png");
     background-repeat: no-repeat;
     background-size: cover;
     background-color: black;
