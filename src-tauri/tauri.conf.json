@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "elangdf",
         "width": 400,
         "height": 860,
@@ -21,7 +22,7 @@
       }
     ],
     "security": {
-            "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: tauri: http: https: ws: wss:; connect-src 'self' ipc: tauri: http: https: ws: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' 'unsafe-hashes'; img-src 'self' data: blob: http: https:; font-src 'self' data: http: https:; frame-src 'self' http: https:; worker-src 'self' blob:; child-src 'self' http: https:"
+      "csp": "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: tauri: http: https: ws: wss:; connect-src 'self' ipc: tauri: http: https: ws: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' 'unsafe-hashes'; img-src 'self' data: blob: http: https:; font-src 'self' data: http: https:; frame-src 'self' http: https:; worker-src 'self' blob:; child-src 'self' http: https:"
     }
   },
   "bundle": {

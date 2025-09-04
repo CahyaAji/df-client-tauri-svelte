@@ -163,7 +163,7 @@
 </script>
 
 <div class="panel-container">
-  <div class="title">Antenna GPS</div>
+  <div class="title">GPS</div>
   <div class="input-panel">
     <div class="latlng-content">
       <div>
@@ -280,9 +280,13 @@
   }
 
   .utm-content {
+    display: flex;
+    flex-direction: column;
     background-color: #222222;
     color: white;
     padding: 2px;
+    justify-content: center;
+    align-items: center;
   }
   .utm-field {
     display: flex;

@@ -26,7 +26,7 @@
 </script>
 
 <div class="panel-container">
-  <div class="title">Options</div>
+  <div class="title">Compass</div>
   <div class="panel-content">
     <div>
       <div class="circle">
