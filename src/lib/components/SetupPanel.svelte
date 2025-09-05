@@ -5,11 +5,13 @@
   import Compass from "./Compass.svelte";
   import Gps from "./GPS.svelte";
   import { API_URL } from "../utils/apihandler";
+  import Spectrum from "./Spectrum.svelte";
 
   let activeTab = $state("setFreq");
+  let spectrumWindow = $state(null);
 
   async function openSpectrum() {
-    const spectrumWindow = new WebviewWindow("spectrum-window", {
+    spectrumWindow = new WebviewWindow("spectrum-window", {
       title: "elangdf - Spectrum",
       url: `${API_URL}/spectrum`,
       width: 800,
@@ -31,6 +33,28 @@
       window.location.reload();
     });
   }
+
+  async function closeSpectrumWindow() {
+    if (spectrumWindow) {
+      try {
+        await spectrumWindow.close();
+        spectrumWindow = null;
+      } catch (e) {
+        console.log("Spectrum window was already closed");
+        spectrumWindow = null;
+      }
+    }
+  }
+
+  /**
+   * @param {string} tabName
+   */
+  function switchToTab(tabName) {
+    if (activeTab === "spectrum" && tabName !== "spectrum") {
+      closeSpectrumWindow();
+    }
+    activeTab = tabName;
+  }
 </script>
 
 <div class="panel-container">
@@ -43,26 +67,35 @@
       <Gps />
     {:else if activeTab === "options"}
       <Options />
+    {:else if activeTab === "spectrum"}
+      <Spectrum />
     {/if}
   </div>
-  <div style="flex-shrink: 0; padding: 2px; background-color: #141414; gap: 0">
+  <div
+    style="flex-shrink: 0; padding: 2px 0px 6px 8px; background-color: #141414; gap: 0; border-top: 1px solid gray;"
+  >
     <button
       class:active={activeTab === "setFreq"}
-      onclick={() => (activeTab = "setFreq")}>Set Frequency</button
+      onclick={() => switchToTab("setFreq")}>Set Frequency</button
     >
     <button
       class:active={activeTab === "compass"}
-      onclick={() => (activeTab = "compass")}>Compass</button
+      onclick={() => switchToTab("compass")}>Compass</button
     >
     <button
       class:active={activeTab === "GPS"}
-      onclick={() => (activeTab = "GPS")}>GPS</button
+      onclick={() => switchToTab("GPS")}>GPS</button
     >
     <button
       class:active={activeTab === "options"}
-      onclick={() => (activeTab = "options")}>Options</button
+      onclick={() => switchToTab("options")}>Options</button
     >
-    <button onclick={openSpectrum}>Spectrum</button>
+    <button
+      onclick={() => {
+        switchToTab("spectrum");
+        openSpectrum();
+      }}>Spectrum</button
+    >
   </div>
 </div>
 

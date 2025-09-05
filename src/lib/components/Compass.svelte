@@ -49,7 +49,7 @@
     <div class="title">Compass</div>
   {/if}
   <div class="panel-content">
-    <div>
+    <div class="compass-display">
       <div class="circle">
         {#if compassStore.data && compassStore.data.heading !== undefined && compassStore.data.heading !== null}
           <div
@@ -116,6 +116,11 @@
     grid-template-columns: 2fr 3fr;
     background-color: #222222;
   }
+  .compass-display {
+    display: flex;
+    flex-direction: column;
+    padding: auto;
+  }
   .circle {
     display: flex;
     justify-content: center;
@@ -123,13 +128,13 @@
     border-radius: 50%;
     background-color: black;
     border: 1px solid white;
-    width: 86px;
-    height: 86px;
-    margin: 8px auto 6px;
+    width: 100px;
+    height: 100px;
+    margin: auto;
   }
   .rotating-circle {
-    height: 50px;
-    width: 50px;
+    height: 60px;
+    width: 60px;
     border-radius: 50%;
     background-color: transparent;
   }
@@ -147,7 +152,7 @@
     font-size: 13pt;
     padding: 2px 6px;
     width: 80px;
-    margin: 2px auto;
+    margin: auto;
     border-radius: 15px;
   }
   .compass-correction {
