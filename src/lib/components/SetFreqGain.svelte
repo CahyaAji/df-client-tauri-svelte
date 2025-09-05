@@ -5,6 +5,7 @@
   import DotNumberInput from "./DotNumberInput.svelte";
 
   let inputFreqMhz = $state(0);
+  let errorMessage = $state("");
 
   let currentStoreFreq = $derived(signalState.currentFreq);
   let isAutoMode = $derived(signalState.autoMode);
@@ -16,7 +17,7 @@
       : currentStoreFreq
   );
 
-  $effect(() => {
+  $effect.pre(() => {
     inputFreqMhz = currentStoreFreq;
   });
 
@@ -40,38 +41,63 @@
   }
 
   async function handleFrequencySet() {
-    if (!isAutoMode) {
-      signalState.setFrequency(inputFreqMhz);
+    errorMessage = "";
 
-      const antSpace = inputFreqMhz >= 250 ? 0.25 : 0.45;
+    if (isAutoMode) {
+      return;
+    }
 
-      try {
-        // STEP 1: Set antenna
-        const antennaSuccess = await handleSetAntenna(antSpace);
+    if (inputFreqMhz < 24.0 || inputFreqMhz > 1000.0) {
+      console.error("Frequency out of range (24.0 - 1000.0 MHz)");
+      errorMessage = "Error: Frekuensi harus diantara 24.0 - 1000.0 MHz";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
+      return;
+    }
 
-        if (!antennaSuccess) {
-          console.log(
-            "Antenna setting failed, but continuing with frequency setting"
-          );
-        }
+    signalState.setFrequency(inputFreqMhz);
 
-        // STEP 2: Set frequency and gain
-        const apiData = {
-          center_freq: inputFreqMhz,
-          uniform_gain: signalState.currentGain,
-          ant_spacing_meters: antSpace,
-        };
-        const result = await setFreqGainApi(apiData);
-        if (result.success) {
-          console.log(
-            `Manual frequency set successfully - Antenna: ${antennaSuccess ? "OK" : "FAILED"}, Frequency: OK`
-          );
-        } else {
-          console.error("API call failed:", result.error);
-        }
-      } catch (error) {
-        console.error("handleFrequencySet error:", error);
+    const antSpace = inputFreqMhz >= 250 ? 0.25 : 0.45;
+
+    try {
+      // STEP 1: Set antenna
+      const antennaSuccess = await handleSetAntenna(antSpace);
+
+      if (!antennaSuccess) {
+        console.log(
+          "Antenna setting failed, but continuing with frequency setting"
+        );
+        errorMessage = "Error: Gagal mengatur antena";
+        setTimeout(() => {
+          errorMessage = "";
+        }, 1500);
       }
+
+      // STEP 2: Set frequency and gain
+      const apiData = {
+        center_freq: inputFreqMhz,
+        uniform_gain: signalState.currentGain,
+        ant_spacing_meters: antSpace,
+      };
+      const result = await setFreqGainApi(apiData);
+      if (result.success) {
+        console.log(
+          `Manual frequency set successfully - Antenna: ${antennaSuccess ? "OK" : "FAILED"}, Frequency: OK`
+        );
+      } else {
+        console.error("API call failed:", result.error);
+        errorMessage = "Error: Gagal mengatur frekuensi";
+        setTimeout(() => {
+          errorMessage = "";
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("handleFrequencySet error:", error);
+      errorMessage = "Error: Gagal mengatur frekuensi";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
     }
   }
 
@@ -98,7 +124,11 @@
 </script>
 
 <div class="panel-container">
-  <div class="title">Frequency Setting</div>
+  {#if errorMessage}
+    <div class="error-message">{errorMessage}</div>
+  {:else}
+    <div class="title">Frequency Setting</div>
+  {/if}
   <div class="panel-content">
     <div class="frequency-setting">
       <div style="display: flex; margin: 4px 0px; align-items: center;">
@@ -205,6 +235,11 @@
   .title {
     background-color: #141414;
     color: white;
+    padding: 8px 8px 4px;
+  }
+  .error-message {
+    background-color: #ffdddd;
+    color: #d8000c;
     padding: 8px 8px 4px;
   }
   .panel-content {

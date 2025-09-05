@@ -8,6 +8,7 @@
 
   let dfName = $state("");
   let isShuttingDown = $state(false);
+  let message = $state("");
 
   $effect(() => {
     dfName = signalState.stationName;
@@ -32,7 +33,7 @@
     }
 
     console.log("Waiting 2 seconds before closing...");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2500));
 
     try {
       const appWindow = getCurrentWindow();
@@ -48,6 +49,12 @@
     console.log("Turning off DF...");
     turnOffDf().catch((error) => console.error("TurnOff DF error:", error));
 
+    message =
+      "Unit DF akan mati dalam ±20 detik, jangan langsung matikan daya DF";
+    setTimeout(() => {
+      message = "";
+    }, 2300);
+
     await closeApp();
   }
 
@@ -57,12 +64,22 @@
     console.log("Restarting DF...");
     restartDf().catch((error) => console.error("Restart DF error:", error));
 
+    message =
+      "Unit DF akan restart dalam ±60 detik, jangan langsung matikan daya DF";
+    setTimeout(() => {
+      message = "";
+    }, 2300);
+
     await closeApp();
   }
 
   async function handleSetName() {
     if (!dfName) {
       console.warn("Unit name is empty");
+      message = "Error: Nama unit tidak boleh kosong";
+      setTimeout(() => {
+        message = "";
+      }, 1500);
       return;
     }
 
@@ -76,7 +93,11 @@
 </script>
 
 <div class="panel-container">
-  <div class="title">Options</div>
+  {#if message}
+    <div class="message">{message}</div>
+  {:else}
+    <div class="title">Options</div>
+  {/if}
   <div class="panel-content">
     <label style="margin: 4px 8px;">
       <span>Unit Name :</span>
@@ -124,6 +145,11 @@
     background-color: #141414;
     padding: 8px 8px 4px;
     color: white;
+  }
+  .message {
+    background-color: #ffdddd;
+    color: #d8000c;
+    padding: 8px 8px 4px;
   }
   .panel-content {
     display: flex;
