@@ -229,15 +229,15 @@
     cursor: not-allowed;
   }
 
-  .input-freq {
+  /* .input-freq {
     padding: 4px 8px;
     width: 110px;
-  }
+  } */
 
-  .input-freq:disabled {
+  /* .input-freq:disabled {
     background-color: #333;
     color: #888;
-  }
+  } */
 
   .gain-setting {
     background-color: #222222;
