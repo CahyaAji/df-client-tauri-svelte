@@ -3,12 +3,25 @@
   import { configStore } from "../stores/Config.Store.svelte";
 
   let inputOffset = $state(0);
+  let errorMessage = $state("");
 
   let compassOffset = $derived(configStore.compassOffset);
 
   async function handleSetOffset() {
     if (inputOffset === null || inputOffset === undefined) {
       console.warn("offset value is empty");
+      errorMessage = "Offset tidak boleh kosong";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
+      return;
+    }
+
+    if (inputOffset < -360 || inputOffset > 360) {
+      errorMessage = "Offset harus diantara -360 sampai 360";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
       return;
     }
 
@@ -17,6 +30,10 @@
       console.log("Compass offset updated successfully");
     } else {
       console.error("Failed to update compass offset:", result.error);
+      errorMessage = "Error: Gagal mengatur offset";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
     }
   }
 
@@ -26,7 +43,11 @@
 </script>
 
 <div class="panel-container">
-  <div class="title">Compass</div>
+  {#if errorMessage}
+    <div class="error-message">{errorMessage}</div>
+  {:else}
+    <div class="title">Compass</div>
+  {/if}
   <div class="panel-content">
     <div>
       <div class="circle">
@@ -83,6 +104,11 @@
     background-color: #141414;
     padding: 8px 8px 4px;
     color: white;
+  }
+  .error-message {
+    background-color: #ffdddd;
+    color: #d8000c;
+    padding: 8px 8px 4px;
   }
   .panel-content {
     flex: 1;
@@ -142,9 +168,5 @@
   .compass-correction > button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
-  }
-  .error {
-    color: red;
-    font-size: 12px;
   }
 </style>
