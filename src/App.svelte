@@ -16,6 +16,7 @@
 
   let appInitialized = false;
 
+  let errorMessage = $state("");
   let isChangingFreq = $state(false);
   let prevFreq = $state(0);
   let retryCount = $state(0);
@@ -314,6 +315,7 @@
         console.log("Initial settings loaded:", savedDFSettings);
       } catch (error) {
         console.log("Failed to load initial setting config:", error);
+        errorMessage = error.message || "Unknown error";
       }
 
       console.log("App initialization completed");
@@ -346,5 +348,21 @@
   <Header />
   <StatusWebv />
   <PlotContainer />
-  <SetupPanel />
+  {#if errorMessage}
+    <div
+      style="padding: 20px; background-color: #222222; color: white; border-top: 1px solid gray;"
+    >
+      <div>Error, gagal memuat data</div>
+      <div>Periksa kabel & koneksi Unit DF</div>
+      <div>
+        kemudian klik Refresh atau <br />
+        tutup & buka kembali aplikasi
+      </div>
+      <div style="background-color: #141414; color: white;">
+        {errorMessage}
+      </div>
+    </div>
+  {:else}
+    <SetupPanel />
+  {/if}
 </main>
