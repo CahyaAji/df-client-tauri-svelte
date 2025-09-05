@@ -5,11 +5,13 @@
    */
 
   export let value = 0; // always a number
-  export let step = 0.001;
   export let disabled = false;
   export let readonly = false;
   export let placeholder = "";
 
+  /**
+   * @param {{ target: HTMLInputElement; }} e
+   */
   function handleInput(e) {
     const target = /** @type {HTMLInputElement} */ (e.target);
     let normalized = target.value.replace(",", "."); // replace commas
