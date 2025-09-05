@@ -1,26 +1,20 @@
 <script>
-  /**
-   * A numeric input that always uses dot as decimal separator,
-   * regardless of user locale. Normalizes commas (`,`) to dots (`.`).
-   */
-
-  export let value = 0; // always a number
+  export let value = 0;
   export let disabled = false;
   export let readonly = false;
   export let placeholder = "";
 
   function handleInput(e) {
     const target = /** @type {HTMLInputElement} */ (e.target);
-    let normalized = target.value.replace(",", "."); // replace commas
-    normalized = normalized.replace(/[^0-9.\-]/g, ""); // filter out junk
+    let normalized = target.value.replace(",", ".");
+    normalized = normalized.replace(/[^0-9.\-]/g, "");
 
     const num = parseFloat(normalized);
-    value = isNaN(num) ? 0 : num; // keep it as number
+    value = isNaN(num) ? 0 : num;
   }
 
   function handleBlur() {
     if (!isNaN(value)) {
-      // format to fixed decimals, then parse back to number
       value = Number(value.toFixed(3));
     }
   }
