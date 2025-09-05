@@ -130,20 +130,30 @@
           {#if isAutoMode}
             <input
               class="input-freq"
-              type="number"
+              type="text"
               step="0.001"
               lang="en-US"
-              value={displayFreqMhz}
+              value={displayFreqMhz.toFixed(3)}
               disabled
               readonly
             />
           {:else}
             <input
               class="input-freq"
-              type="number"
+              type="text"
               lang="en-US"
               step="0.001"
               bind:value={inputFreqMhz}
+              oninput={(e) => {
+                const target = /** @type {HTMLInputElement} */ (e.target);
+                const normalized = target.value.replace(",", ".");
+                inputFreqMhz = parseFloat(normalized) || 0;
+              }}
+              onblur={() => {
+                if (!isNaN(inputFreqMhz)) {
+                  inputFreqMhz = Number(inputFreqMhz.toFixed(3));
+                }
+              }}
             />
           {/if}
           <span>MHz</span>
