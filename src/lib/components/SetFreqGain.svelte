@@ -2,6 +2,7 @@
   import { udpState } from "../stores/udpStore.svelte";
   import { signalState } from "../stores/signalState.svelte";
   import { setFreqGainApi, setAntenna } from "../utils/apihandler";
+  import DotNumberInput from "./DotNumberInput.svelte";
 
   let inputFreqMhz = $state(0);
 
@@ -128,7 +129,8 @@
         <label>
           <span>Frequency:</span>
           {#if isAutoMode}
-            <input
+            <DotNumberInput value={displayFreqMhz} disabled readonly />
+            <!-- <input
               class="input-freq"
               type="number"
               step="0.001"
@@ -136,15 +138,16 @@
               value={displayFreqMhz}
               disabled
               readonly
-            />
+            /> -->
           {:else}
-            <input
+            <DotNumberInput bind:value={inputFreqMhz} />
+            <!-- <input
               class="input-freq"
               type="number"
               lang="en-US"
               step="0.001"
               bind:value={inputFreqMhz}
-            />
+            /> -->
           {/if}
           <span>MHz</span>
           <button onclick={handleFrequencySet} disabled={isAutoMode}>
