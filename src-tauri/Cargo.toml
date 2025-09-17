@@ -1,6 +1,6 @@
 [package]
 name = "ElangDF"
-version = "1.0.0"
+version = "1.0.1"
 description = "Elang DF Client"
 authors = ["CahyaAji"]
 license = ""
