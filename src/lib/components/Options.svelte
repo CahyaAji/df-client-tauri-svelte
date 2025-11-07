@@ -1,16 +1,19 @@
 <script>
   import { getCurrentWindow } from "@tauri-apps/api/window";
-
+  import { getVersion } from "@tauri-apps/api/app";
   import { signalState } from "../stores/signalState.svelte.js";
   import { turnOffDf, restartDf, setStationId } from "../utils/apihandler.js";
   import { udpState, udpStore } from "../stores/udpStore.svelte.js";
   import { dfStore } from "../stores/dfStore.svelte.js";
+  import { onMount } from "svelte";
 
+  let appVersion = $state("");
   let dfName = $state("");
   let isShuttingDown = $state(false);
   let message = $state("");
 
-  $effect(() => {
+  onMount(async () => {
+    appVersion = await getVersion();
     dfName = signalState.stationName;
   });
 
@@ -74,7 +77,9 @@
   }
 
   async function handleSetName() {
-    if (!dfName) {
+    const trimmedName = dfName.trim();
+
+    if (!trimmedName) {
       console.warn("Unit name is empty");
       message = "Error: Nama unit tidak boleh kosong";
       setTimeout(() => {
@@ -84,10 +89,18 @@
     }
 
     try {
-      const response = await setStationId(dfName);
-      signalState.setStationName(dfName);
+      await setStationId(trimmedName);
+      signalState.setStationName(trimmedName);
+      message = "Nama unit berhasil diubah";
+      setTimeout(() => {
+        message = "";
+      }, 1500);
     } catch (error) {
       console.error("error setStationName:", error);
+      message = "Error: Gagal mengubah nama unit";
+      setTimeout(() => {
+        message = "";
+      }, 1500);
     }
   }
 </script>
@@ -99,8 +112,12 @@
     <div class="title">Options</div>
   {/if}
   <div class="panel-content">
+    <div style="margin: 4px 8px;">
+      <span>UI Version: </span>
+      <span>{appVersion}</span>
+    </div>
     <label style="margin: 4px 8px;">
-      <span>Unit Name :</span>
+      <span>Unit Name: </span>
       <input
         type="text"
         style="padding: 4px 8px;"
@@ -113,6 +130,7 @@
         disabled={isShuttingDown}>Set</button
       >
     </label>
+
     <div class="power-option">
       <div>Power Option</div>
       <div style="display: flex; flex: 1; padding: 8px; margin: auto;">
