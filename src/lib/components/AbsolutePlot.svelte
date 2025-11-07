@@ -8,13 +8,9 @@
   let absHeading = $derived(
     dfStore.data?.heading !== undefined &&
       dfStore.data?.heading !== null &&
-      compassStore.data?.heading !== undefined &&
-      compassStore.data?.heading !== null
-      ? (360 +
-          dfStore.data.heading +
-          compassStore.data.heading +
-          compassOffset) %
-          360
+      compassStore.data !== undefined &&
+      compassStore.data !== null
+      ? (360 + dfStore.data.heading + compassStore.data + compassOffset) % 360
       : null
   );
 </script>

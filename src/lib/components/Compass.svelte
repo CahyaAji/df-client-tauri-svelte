@@ -50,25 +50,24 @@
   {/if}
   <div class="panel-content">
     <div class="compass-display">
-      <div class="circle">
-        {#if compassStore.data && compassStore.data.heading !== undefined && compassStore.data.heading !== null}
+      <div class="compass">
+        {#if compassStore.data !== undefined && compassStore.data !== null}
           <div
             class="rotating-circle"
-            style="transform: rotate({compassStore.data.heading +
+            style="transform: rotate({360 -
+              compassStore.data -
               compassOffset}deg); transition: transform 0.2s;"
           >
-            <div class="arrow">
-              <span
-                style="position: relative; top: -20px; right: 3px; text-align: center; font-size: 15pt; color: yellow;"
-                >N</span
-              >
-            </div>
+            N
           </div>
         {/if}
+        <div class="circle">
+          <div class="arrow"></div>
+        </div>
       </div>
-      {#if compassStore.data && compassStore.data.heading !== undefined && compassStore.data.heading !== null}
+      {#if compassStore.data && compassStore.data !== undefined && compassStore.data !== null}
         <div class="cmps-value">
-          {Math.round(compassStore.data.heading + compassOffset)}°
+          {Math.round(compassStore.data + compassOffset)}°
         </div>
       {:else}
         <div class="cmps-value">--</div>
@@ -121,22 +120,33 @@
     flex-direction: column;
     padding: auto;
   }
-  .circle {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    background-color: black;
-    border: 1px solid white;
-    width: 100px;
-    height: 100px;
+  .compass {
+    position: relative;
     margin: auto;
+    display: flex;
+    width: 122px;
+    height: 122px;
+    align-items: center;
+    justify-content: center;
   }
   .rotating-circle {
-    height: 60px;
-    width: 60px;
+    position: absolute;
+    display: flex;
+    width: 122px;
+    height: 122px;
     border-radius: 50%;
-    background-color: transparent;
+    justify-content: center;
+    margin: auto;
+    color: yellow;
+    font-size: 16pt;
+  }
+  .circle {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: auto;
+    border: 1px solid white;
   }
   .arrow {
     width: 6px;
@@ -150,7 +160,7 @@
     background-color: black;
     color: white;
     font-size: 13pt;
-    padding: 2px 6px;
+    padding: 4px 6px;
     width: 80px;
     margin: auto;
     border-radius: 15px;
