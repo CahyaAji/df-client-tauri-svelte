@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from "svelte";
   import { readGPS } from "../utils/apihandler";
   import { configStore } from "../stores/Config.Store.svelte";
   import * as utm from "utm";
@@ -12,25 +13,14 @@
   let inputUtmNorthing = $state("");
   let inputUtmCO = $state("");
 
-  let storedLat = $derived(configStore.gpsLocation.lat);
-  let storedLng = $derived(configStore.gpsLocation.lng);
-  let storedUtmZone = $derived(configStore.utmLocation.zone);
-  let storedUtmEasting = $derived(configStore.utmLocation.easting);
-  let storedUtmNorthing = $derived(configStore.utmLocation.northing);
-  let storedUtmCO = $derived(configStore.utmLocation.co);
-
-  let initialized = $state(false);
-
-  $effect(() => {
-    if (!initialized) {
-      inputLat = storedLat;
-      inputLng = storedLng;
-      inputUtmZone = storedUtmZone;
-      inputUtmEasting = storedUtmEasting;
-      inputUtmNorthing = storedUtmNorthing;
-      inputUtmCO = storedUtmCO;
-      initialized = true;
-    }
+  // Initialize once when component mounts
+  onMount(() => {
+    inputLat = configStore.gpsLocation.lat;
+    inputLng = configStore.gpsLocation.lng;
+    inputUtmZone = configStore.utmLocation.zone;
+    inputUtmEasting = configStore.utmLocation.easting;
+    inputUtmNorthing = configStore.utmLocation.northing;
+    inputUtmCO = configStore.utmLocation.co;
   });
 
   // 1. Read GPS function with retry logic
