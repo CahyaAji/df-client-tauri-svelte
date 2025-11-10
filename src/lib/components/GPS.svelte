@@ -3,10 +3,19 @@
   import { readGPS } from "../utils/apihandler";
   import { configStore } from "../stores/Config.Store.svelte";
   import * as utm from "utm";
+  import {
+    decimalToDMS,
+    dmsToDecimal,
+    validateDMS,
+  } from "../utils/unitConverter";
+
+  let errorMessage = $state("");
 
   let inputLat = $state(0);
   let inputLng = $state(0);
   let isReading = $state(false);
+  let dmsLat = $state("");
+  let dmsLng = $state("");
 
   let inputUtmZone = $state("");
   let inputUtmEasting = $state("");
@@ -21,6 +30,9 @@
     inputUtmEasting = configStore.utmLocation.easting;
     inputUtmNorthing = configStore.utmLocation.northing;
     inputUtmCO = configStore.utmLocation.co;
+
+    dmsLat = decimalToDMS(inputLat, true);
+    dmsLng = decimalToDMS(inputLng, false);
   });
 
   // 1. Read GPS function with retry logic
@@ -87,14 +99,44 @@
         `Failed to get valid GPS coordinates after ${MAX_RETRIES} attempts`
       );
     } catch (error) {
-      console.error("Error during GPS reading:", error);
+      console.warn("Error during GPS reading:", error);
+      errorMessage = "Error, gagal membaca GPS";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
     } finally {
       isReading = false;
+      dmsLat = decimalToDMS(inputLat, true);
+      dmsLng = decimalToDMS(inputLng, false);
     }
   }
 
   async function handleSaveGPS() {
     if (configStore.isLoading) return;
+
+    if (dmsLat === "" || dmsLat === null || dmsLng === "" || dmsLng === null) {
+      console.log("error dmsLat tidak boleh kosong");
+      errorMessage = "Error, koordinat tidak boleh kosong";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
+      return;
+    }
+
+    const isdmsLatValid = validateDMS(dmsLat);
+    const isdmsLngValid = validateDMS(dmsLng);
+
+    if (!isdmsLatValid.valid || !isdmsLngValid.valid) {
+      console.log("format dms tidak valid");
+      errorMessage = "Error, format koordinat salah";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
+      return;
+    }
+
+    inputLat = dmsToDecimal(dmsLat);
+    inputLng = dmsToDecimal(dmsLng);
 
     try {
       const gpsResult = await configStore.setGPSLocation(inputLat, inputLng);
@@ -113,29 +155,47 @@
         if (!gpsResult.success) errors.push("GPS: " + gpsResult.error);
         if (!utmResult.success) errors.push("UTM: " + utmResult.error);
 
-        console.error("Failed to save location:", errors.join(", "));
+        console.warn("Failed to save location:", errors.join(", "));
+        errorMessage = "Error, gagal menyimpan lokasi";
+        setTimeout(() => {
+          errorMessage = "";
+        }, 1500);
       }
     } catch (error) {
       console.error("Error saving location:", error);
+      errorMessage = "Error, gagal menyimpan lokasi";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
     }
   }
 
   function handleConvertUTM() {
+    if (dmsLat === "" || dmsLat === null || dmsLng === "" || dmsLng === null) {
+      console.log("error dmsLat tidak boleh kosong");
+      errorMessage = "Error, koordinat tidak boleh kosong";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
+      return;
+    }
+
+    const isdmsLatValid = validateDMS(dmsLat);
+    const isdmsLngValid = validateDMS(dmsLng);
+
+    if (!isdmsLatValid.valid || !isdmsLngValid.valid) {
+      console.log("format dms tidak valid");
+      errorMessage = "Error, format koordinat salah";
+      setTimeout(() => {
+        errorMessage = "";
+      }, 1500);
+      return;
+    }
+
+    inputLat = dmsToDecimal(dmsLat);
+    inputLng = dmsToDecimal(dmsLng);
+
     try {
-      if (!inputLat || !inputLng || inputLat === 0 || inputLng === 0) {
-        alert("Please enter valid latitude and longitude coordinates first");
-        return;
-      }
-
-      if (Math.abs(inputLat) > 90) {
-        alert("Latitude must be between -90 and 90 degrees");
-        return;
-      }
-      if (Math.abs(inputLng) > 180) {
-        alert("Longitude must be between -180 and 180 degrees");
-        return;
-      }
-
       const utmResult = utm.fromLatLon(inputLat, inputLng);
 
       inputUtmZone = `${utmResult.zoneNum}${utmResult.zoneLetter}`;
@@ -153,15 +213,18 @@
 </script>
 
 <div class="panel-container">
-  <div class="title">GPS</div>
+  {#if errorMessage}
+    <div class="error-message">{errorMessage}</div>
+  {:else}
+    <div class="title">GPS</div>
+  {/if}
   <div class="input-panel">
     <div class="latlng-content">
       <div>
         <div>Latitude</div>
         <input
-          type="number"
-          step="0.000001"
-          bind:value={inputLat}
+          type="text"
+          bind:value={dmsLat}
           lang="en-US"
           disabled={isReading || configStore.isLoading}
         />
@@ -169,9 +232,8 @@
       <div>
         <div>Longitude</div>
         <input
-          type="number"
-          step="0.000001"
-          bind:value={inputLng}
+          type="text"
+          bind:value={dmsLng}
           lang="en-US"
           disabled={isReading || configStore.isLoading}
         />
@@ -242,6 +304,11 @@
   .title {
     background-color: #141414;
     color: white;
+    padding: 8px 8px 4px;
+  }
+  .error-message {
+    background-color: #ffdddd;
+    color: #d8000c;
     padding: 8px 8px 4px;
   }
   .input-panel {
