@@ -1,4 +1,7 @@
-### yg belum
+### Keterangan
+ini versi yang menggunakan laptop thinkpad 16 inch
+
+### fix ?
 
 - setAntenna OK
 - hilangkan arrow jika tidak ada data OK
